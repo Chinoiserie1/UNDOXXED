@@ -68,7 +68,7 @@ contract CounterTest is Test {
   function testPublicMint() public {
     Sale memory sale = setSale(100, 1 ether, 0.5 ether, 1);
     undoxxed.setNewSale(1, sale);
-    undoxxed.
+    undoxxed.setSaleStatus(1, Status.started);
     vm.stopPrank();
     vm.startPrank(user1);
   }
