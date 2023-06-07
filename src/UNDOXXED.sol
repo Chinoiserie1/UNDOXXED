@@ -1,9 +1,11 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
 import "lib/Assembly/src/access/Ownable.sol";
 import "lib/Assembly/src/tokens/ERC1155/extensions/ERC1155URIStorage.sol";
 import "lib/Assembly/src/tokens/ERC1155/extensions/ERC1155Supply.sol";
+
+// import "lib/openzeppelin-contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
 
 import "./IUNDOXXED.sol";
 
@@ -19,6 +21,7 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
   event SetSaleWhitelistPrice(uint256 tokenId, uint256 newWhitelistPrice);
   event SetSaleStatus(uint256 _tokenId, Status newStatus);
   event FreezeSale(uint256 tokenId);
+  event FreezeURI(uint256 tokenId);
 
   constructor() ERC1155("UNDOXXED", "UNDX", "") {}
 
@@ -49,28 +52,28 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
 
   function setSaleMaxSupply(uint256 _tokenId, uint256 _maxSupply) external onlyOwner {
     if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
-    if (saleInfo[_tokenId].freeze) revert SaleFreeze();
+    if (saleInfo[_tokenId].freezeSale) revert SaleFreeze();
     saleInfo[_tokenId].maxSupply = _maxSupply;
     emit SetSaleMaxSupply(_tokenId, _maxSupply);
   }
 
   function setSaleMaxPerWallet(uint256 _tokenId, uint256 _maxPerWallet) external onlyOwner {
     if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
-    if (saleInfo[_tokenId].freeze) revert SaleFreeze();
+    if (saleInfo[_tokenId].freezeSale) revert SaleFreeze();
     saleInfo[_tokenId].maxPerWallet = _maxPerWallet;
     emit SetSaleMaxPerWallet(_tokenId, _maxPerWallet);
   }
 
   function setSalePublicPrice(uint256 _tokenId, uint256 _publicPrice) external onlyOwner {
     if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
-    if (saleInfo[_tokenId].freeze) revert SaleFreeze();
+    if (saleInfo[_tokenId].freezeSale) revert SaleFreeze();
     saleInfo[_tokenId].publicPrice = _publicPrice;
     emit SetSalePublicPrice(_tokenId, _publicPrice);
   }
 
   function setSaleWhitelistPrice(uint256 _tokenId, uint256 _whitelistPrice) external onlyOwner {
     if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
-    if (saleInfo[_tokenId].freeze) revert SaleFreeze();
+    if (saleInfo[_tokenId].freezeSale) revert SaleFreeze();
     saleInfo[_tokenId].whitelistPrice = _whitelistPrice;
     emit SetSaleWhitelistPrice(_tokenId, _whitelistPrice);
   }
@@ -87,8 +90,20 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
    */
   function freezeSale(uint256 _tokenId) external onlyOwner {
     if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
-    saleInfo[_tokenId].freeze = true;
+    saleInfo[_tokenId].freezeSale = true;
     emit FreezeSale(_tokenId);
+  }
+
+  function freezeURI(uint256 _tokenId) external onlyOwner {
+    if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
+    saleInfo[_tokenId].freezeURI = true;
+    emit FreezeURI(_tokenId);
+  }
+
+  function setURI(uint256 _tokenId, string calldata _tokenURI) external onlyOwner {
+    if (saleInfo[_tokenId].freezeURI) revert URIFreeze();
+    _setURI(_tokenId, _tokenURI);
+    emit URI(_tokenURI, _tokenId);
   }
 
   // OVERRIDE FUNCTIONS

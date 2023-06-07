@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
 struct Sale {
@@ -7,7 +7,8 @@ struct Sale {
   uint256 whitelistPrice;
   uint256 maxPerWallet;
   Status status;
-  bool freeze;
+  bool freezeSale;
+  bool freezeURI;
 }
 
 enum Status {
@@ -19,6 +20,7 @@ enum Status {
 }
 
 error SaleFreeze();
+error URIFreeze();
 error SaleNotInitialized();
 error SaleAlreadyInitialized();
 error SaleNotStarted();
