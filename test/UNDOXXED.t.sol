@@ -16,6 +16,8 @@ contract CounterTest is Test {
   address internal user2;
   int256 internal user3PrivateKey;
   address internal user3;
+  uint256 internal signerPrivateKey;
+  address internal signer;
 
   function setUp() public {
     ownerPrivateKey = 0xA11CE;
@@ -26,12 +28,15 @@ contract CounterTest is Test {
     user2 = vm.addr(user2PrivateKey);
     user3PrivateKey = 0xD1C;
     user3 = vm.addr(user2PrivateKey);
+    signerPrivateKey = 0xF10;
+    signer = vm.addr(signerPrivateKey);
     vm.startPrank(owner);
 
     undoxxed = new UNDOXXED();
   }
 
   function setSale(
+    address signer,
     uint256 maxSupply,
     uint256 publicPrice,
     uint256 whitelistPrice,
@@ -39,6 +44,7 @@ contract CounterTest is Test {
   )
     public pure returns (Sale memory sale)
   {
+    sale.signer = signer;
     sale.maxSupply = maxSupply;
     sale.publicPrice = publicPrice;
     sale.whitelistPrice = whitelistPrice;
@@ -46,7 +52,7 @@ contract CounterTest is Test {
   }
 
   function testSetNewSale() public {
-    Sale memory sale = setSale(100, 1 ether, 0.5 ether, 1);
+    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 1);
     undoxxed.setNewSale(1, sale);
     Sale memory currentSale = undoxxed.getSaleInfo(1);
     require(currentSale.maxSupply == 100, "fail set maxSupply");
@@ -54,21 +60,22 @@ contract CounterTest is Test {
     require(currentSale.whitelistPrice == 0.5 ether, "fail set whitelist price");
     require(currentSale.maxPerWallet == 1, "fail set max per wallet");
     require(currentSale.status == Status.initialized, "fail set status");
-    require(currentSale.freeze == false, "fail set freeze");
+    require(currentSale.freezeSale == false, "fail set freeze sale");
+    require(currentSale.freezeURI == false, "fail set freeze urif");
   }
 
   function testSetNewSaleFailNotOwner() public {
     vm.stopPrank();
     vm.startPrank(user1);
-    Sale memory sale = setSale(100, 1 ether, 0.5 ether, 1);
+    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 1);
     vm.expectRevert();
     undoxxed.setNewSale(1, sale);
   }
 
   function testPublicMint() public {
-    Sale memory sale = setSale(100, 1 ether, 0.5 ether, 1);
+    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 1);
     undoxxed.setNewSale(1, sale);
-    undoxxed.setSaleStatus(1, Status.started);
+    undoxxed.setSaleStatus(1, Status.publicMint);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.deal(user1, 100 ether);
@@ -78,13 +85,20 @@ contract CounterTest is Test {
   }
 
   function testPublicMintFailInsuficientFunds() public {
-    Sale memory sale = setSale(100, 1 ether, 0.5 ether, 1);
+    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 1);
     undoxxed.setNewSale(1, sale);
-    undoxxed.setSaleStatus(1, Status.started);
+    undoxxed.setSaleStatus(1, Status.publicMint);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.deal(user1, 100 ether);
     vm.expectRevert();
     undoxxed.publicMint{value: 0.5 ether}(1, 1, "");
+  }
+
+  function testURI() public {
+    string memory uri = "TheNewURI/";
+    undoxxed.setURI(1, uri);
+    string memory currentURI = undoxxed.uri(1);
+    require(keccak256(abi.encode(uri)) == keccak256(abi.encode(currentURI)), "fail URI");
   }
 }

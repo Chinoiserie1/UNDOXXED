@@ -26,7 +26,7 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
   constructor() ERC1155("UNDOXXED", "UNDX", "") {}
 
   function publicMint(uint256 _tokenId, uint256 _amountMint, bytes calldata data) external payable {
-    if (saleInfo[_tokenId].status != Status.started) revert SaleNotStarted();
+    if (saleInfo[_tokenId].status != Status.publicMint) revert SaleNotStarted();
     if (_amountMint + mintCount[msg.sender][_tokenId] > saleInfo[_tokenId].maxPerWallet) revert MaxPerWalletReach();
     if (msg.value * _amountMint < saleInfo[_tokenId].publicPrice * _amountMint) revert IncorrectValueSend();
 

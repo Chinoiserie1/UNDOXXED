@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 struct Sale {
+  address signer;
   uint256 maxSupply;
   uint256 publicPrice;
   uint256 whitelistPrice;
@@ -14,7 +15,9 @@ struct Sale {
 enum Status {
   notInitialized,
   initialized,
-  started,
+  allolist,
+  whitelist,
+  publicMint,
   finished,
   paused
 }
