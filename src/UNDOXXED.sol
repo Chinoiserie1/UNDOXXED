@@ -31,7 +31,7 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
     _;
   }
 
-  function whitelistMint(
+  function g(
     uint256 _tokenId,
     uint256 _amountMint,
     uint256 _amountSign,
@@ -41,6 +41,14 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
     external payable verify(msg.sender, _tokenId, _amountSign, Status.whitelist, signature)
   {
     if (saleInfo[_tokenId].status != Status.whitelist) revert WhitelistSaleNotStarted();
+    if (mintCount[msg.sender][_tokenId] + _amountMint > saleInfo[_tokenId].maxPerWallet) revert MaxPerWalletReach();
+    if (msg.value * _amountMint < saleInfo[_tokenId].whitelistPrice * _amountMint) revert IncorrectValueSend();
+
+    _mint(msg.sender, _tokenId, _amountMint, data);
+
+    unchecked {
+      mintCount[msg.sender][_tokenId] += _amountMint;
+    }
   }
 
   function publicMint(uint256 _tokenId, uint256 _amountMint, bytes calldata data) external payable {
