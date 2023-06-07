@@ -8,6 +8,7 @@ import "lib/Assembly/src/tokens/ERC1155/extensions/ERC1155Supply.sol";
 // import "lib/openzeppelin-contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
 
 import "./IUNDOXXED.sol";
+import "./verification/Verification.sol";
 
 contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
   mapping(uint256 => Sale) private saleInfo;
@@ -25,8 +26,25 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
 
   constructor() ERC1155("UNDOXXED", "UNDX", "") {}
 
+  modifier verify(address _to, uint256 _tokenId, uint256 _amount, Status _status, bytes memory _sign) {
+    if (!Verification.verifySignature(saleInfo[_tokenId].signer, _to, _amount, _status, _sign)) revert invalidSignature();
+    _;
+  }
+
+  function whitelistMint(
+    uint256 _tokenId,
+    uint256 _amountMint,
+    uint256 _amountSign,
+    bytes calldata signature,
+    bytes calldata data
+  )
+    external payable verify(msg.sender, _tokenId, _amountSign, Status.whitelist, signature)
+  {
+    if (saleInfo[_tokenId].status != Status.whitelist) revert WhitelistSaleNotStarted();
+  }
+
   function publicMint(uint256 _tokenId, uint256 _amountMint, bytes calldata data) external payable {
-    if (saleInfo[_tokenId].status != Status.publicMint) revert SaleNotStarted();
+    if (saleInfo[_tokenId].status != Status.publicMint) revert PublicSaleNotStarted();
     if (_amountMint + mintCount[msg.sender][_tokenId] > saleInfo[_tokenId].maxPerWallet) revert MaxPerWalletReach();
     if (msg.value * _amountMint < saleInfo[_tokenId].publicPrice * _amountMint) revert IncorrectValueSend();
 
