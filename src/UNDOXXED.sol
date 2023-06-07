@@ -5,31 +5,9 @@ import "lib/Assembly/src/access/Ownable.sol";
 import "lib/Assembly/src/tokens/ERC1155/extensions/ERC1155URIStorage.sol";
 import "lib/Assembly/src/tokens/ERC1155/extensions/ERC1155Supply.sol";
 
-error SaleFreeze();
-error SaleNotInitialized();
-error SaleAlreadyInitialized();
-error SaleNotStarted();
-error MaxPerWalletReach();
-error IncorrectValueSend();
+import "./IUNDOXXED.sol";
 
 contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
-  struct Sale {
-    uint256 maxSupply;
-    uint256 publicPrice;
-    uint256 whitelistPrice;
-    uint256 maxPerWallet;
-    Status status;
-    bool freeze;
-  }
-
-  enum Status {
-    notInitialized,
-    initialized,
-    started,
-    finished,
-    paused
-  }
-
   mapping(uint256 => Sale) private saleInfo;
   // address who mint => tokenId => mint count
   mapping(address => mapping(uint256 => uint256)) private mintCount;
@@ -55,7 +33,12 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
     }
   }
 
-  // ONLY OWNER
+  // VIEW FUNCTIONS
+  function getSaleInfo(uint256 _tokenId) external view returns (Sale memory sale) {
+    return saleInfo[_tokenId];
+  }
+
+  // ONLY OWNER FUNCTIONS
   function setNewSale(uint256 _tokenId, Sale memory _newsale) external onlyOwner {
     if (saleInfo[_tokenId].status != Status.notInitialized) revert SaleAlreadyInitialized();
     saleInfo[_tokenId] = _newsale;
