@@ -75,7 +75,7 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
 
   /**
    * @notice freeze the sale for update maxSupply, publicPrice, whitelistPrice, maxPerWallet
-   * @param _tokenId the id of the sale
+   * @param _tokenId the id of the sale to freeze
    */
   function freezeSale(uint256 _tokenId) external onlyOwner {
     if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();

@@ -37,7 +37,7 @@ contract CounterTest is Test {
     uint256 whitelistPrice,
     uint256 maxPerWallet
   )
-    public returns (Sale memory sale)
+    public pure returns (Sale memory sale)
   {
     sale.maxSupply = maxSupply;
     sale.publicPrice = publicPrice;
@@ -55,5 +55,13 @@ contract CounterTest is Test {
     require(currentSale.maxPerWallet == 1, "fail set max per wallet");
     require(currentSale.status == Status.notInitialized, "fail set status");
     require(currentSale.freeze == false, "fail set freeze");
+  }
+
+  function testSetNewSaleFailNotOwner() public {
+    vm.stopPrank();
+    vm.startPrank(user1);
+    Sale memory sale = setSale(100, 1 ether, 0.5 ether, 1);
+    vm.expectRevert();
+    undoxxed.setNewSale(1, sale);
   }
 }
