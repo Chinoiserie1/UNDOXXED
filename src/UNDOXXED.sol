@@ -17,6 +17,7 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
   event SetSaleMaxSupply(uint256 tokenId, uint256 newMaxSupply);
   event SetSalePublicPrice(uint256 tokenId, uint256 newPublicPrice);
   event SetSaleWhitelistPrice(uint256 tokenId, uint256 newWhitelistPrice);
+  event SetSaleStatus(uint256 _tokenId, Status newStatus);
   event FreezeSale(uint256 tokenId);
 
   constructor() ERC1155("UNDOXXED", "UNDX", "") {}
@@ -71,6 +72,12 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
     if (saleInfo[_tokenId].freeze) revert SaleFreeze();
     saleInfo[_tokenId].whitelistPrice = _whitelistPrice;
     emit SetSaleWhitelistPrice(_tokenId, _whitelistPrice);
+  }
+
+  function g(uint256 _tokenId, Status newStatus) external onlyOwner {
+    if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
+    saleInfo[_tokenId].status = newStatus;
+    emit SetSaleStatus(_tokenId, newStatus);
   }
 
   /**
