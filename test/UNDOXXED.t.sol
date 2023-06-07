@@ -77,7 +77,7 @@ contract CounterTest is Test {
     require(balance == 1, "fail mint for user1");
   }
 
-  function testPublicMintFailInssuficientFunds() public {
+  function testPublicMintFailInsuficientFunds() public {
     Sale memory sale = setSale(100, 1 ether, 0.5 ether, 1);
     undoxxed.setNewSale(1, sale);
     undoxxed.setSaleStatus(1, Status.started);
