@@ -6,7 +6,8 @@ import "lib/Assembly/src/tokens/ERC1155/extensions/ERC1155URIStorage.sol";
 import "lib/Assembly/src/tokens/ERC1155/extensions/ERC1155Supply.sol";
 
 error SaleFreeze();
-error SaleNotInitialised();
+error SaleNotInitialized();
+error SaleAlreadyInitialized();
 error SaleNotStarted();
 error MaxPerWalletReach();
 error IncorrectValueSend();
@@ -22,7 +23,8 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
   }
 
   enum Status {
-    notInitialised,
+    notInitialized,
+    initialized,
     started,
     finished,
     paused
@@ -32,6 +34,7 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
   // address who mint => tokenId => mint count
   mapping(address => mapping(uint256 => uint256)) private mintCount;
 
+  event SetNewSale(uint256 tokenId, Sale newSale);
   event SetSaleMaxPerWallet(uint256 tokenId, uint256 newMaxPerWallet);
   event SetSaleMaxSupply(uint256 tokenId, uint256 newMaxSupply);
   event SetSalePublicPrice(uint256 tokenId, uint256 newPublicPrice);
@@ -41,9 +44,9 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
   constructor() ERC1155("UNDOXXED", "UNDX", "") {}
 
   function publicMint(uint256 _tokenId, uint256 _amountMint, bytes calldata data) external payable {
-    if(saleInfo[_tokenId].status != Status.started) revert SaleNotStarted();
-    if(_amountMint + mintCount[msg.sender][_tokenId] > saleInfo[_tokenId].maxPerWallet) revert MaxPerWalletReach();
-    if(msg.value * _amountMint < saleInfo[_tokenId].publicPrice * _amountMint) revert IncorrectValueSend();
+    if (saleInfo[_tokenId].status != Status.started) revert SaleNotStarted();
+    if (_amountMint + mintCount[msg.sender][_tokenId] > saleInfo[_tokenId].maxPerWallet) revert MaxPerWalletReach();
+    if (msg.value * _amountMint < saleInfo[_tokenId].publicPrice * _amountMint) revert IncorrectValueSend();
 
     _mint(msg.sender, _tokenId, _amountMint, data);
 
@@ -53,25 +56,35 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
   }
 
   // ONLY OWNER
+  function setNewSale(uint256 _tokenId, Sale memory _newsale) external onlyOwner {
+    if (saleInfo[_tokenId].status != Status.notInitialized) revert SaleAlreadyInitialized();
+    saleInfo[_tokenId] = _newsale;
+    emit SetNewSale(_tokenId, _newsale);
+  }
+
   function setSaleMaxSupply(uint256 _tokenId, uint256 _maxSupply) external onlyOwner {
+    if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
     if (saleInfo[_tokenId].freeze) revert SaleFreeze();
     saleInfo[_tokenId].maxSupply = _maxSupply;
     emit SetSaleMaxSupply(_tokenId, _maxSupply);
   }
 
   function setSaleMaxPerWallet(uint256 _tokenId, uint256 _maxPerWallet) external onlyOwner {
+    if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
     if (saleInfo[_tokenId].freeze) revert SaleFreeze();
     saleInfo[_tokenId].maxPerWallet = _maxPerWallet;
     emit SetSaleMaxPerWallet(_tokenId, _maxPerWallet);
   }
 
   function setSalePublicPrice(uint256 _tokenId, uint256 _publicPrice) external onlyOwner {
+    if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
     if (saleInfo[_tokenId].freeze) revert SaleFreeze();
     saleInfo[_tokenId].publicPrice = _publicPrice;
     emit SetSalePublicPrice(_tokenId, _publicPrice);
   }
 
   function setSaleWhitelistPrice(uint256 _tokenId, uint256 _whitelistPrice) external onlyOwner {
+    if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
     if (saleInfo[_tokenId].freeze) revert SaleFreeze();
     saleInfo[_tokenId].whitelistPrice = _whitelistPrice;
     emit SetSaleWhitelistPrice(_tokenId, _whitelistPrice);
@@ -82,7 +95,7 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
    * @param _tokenId the id of the sale
    */
   function freezeSale(uint256 _tokenId) external onlyOwner {
-    if(saleInfo[_tokenId].status == Status.notInitialised) revert SaleNotInitialised();
+    if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
     saleInfo[_tokenId].freeze = true;
     emit FreezeSale(_tokenId);
   }
