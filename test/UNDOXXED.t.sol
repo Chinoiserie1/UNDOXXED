@@ -53,7 +53,7 @@ contract CounterTest is Test {
     require(currentSale.publicPrice == 1 ether, "fail set public price");
     require(currentSale.whitelistPrice == 0.5 ether, "fail set whitelist price");
     require(currentSale.maxPerWallet == 1, "fail set max per wallet");
-    require(currentSale.status == Status.notInitialized, "fail set status");
+    require(currentSale.status == Status.initialized, "fail set status");
     require(currentSale.freeze == false, "fail set freeze");
   }
 
@@ -65,11 +65,15 @@ contract CounterTest is Test {
     undoxxed.setNewSale(1, sale);
   }
 
-  function testPublicMint() public {
+  function g() public {
     Sale memory sale = setSale(100, 1 ether, 0.5 ether, 1);
     undoxxed.setNewSale(1, sale);
     undoxxed.setSaleStatus(1, Status.started);
     vm.stopPrank();
     vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    undoxxed.publicMint{value: 1 ether}(1, 1, "");
+    uint256 balance = undoxxed.balanceOf(address(user1), 1);
+    require(balance == 1, "fail mint for user1");
   }
 }
