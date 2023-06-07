@@ -48,5 +48,12 @@ contract CounterTest is Test {
   function testSetNewSale() public {
     Sale memory sale = setSale(100, 1 ether, 0.5 ether, 1);
     undoxxed.setNewSale(1, sale);
+    Sale memory currentSale = undoxxed.getSaleInfo(1);
+    require(currentSale.maxSupply == 100, "fail set maxSupply");
+    require(currentSale.publicPrice == 1 ether, "fail set public price");
+    require(currentSale.whitelistPrice == 0.5 ether, "fail set whitelist price");
+    require(currentSale.maxPerWallet == 1, "fail set max per wallet");
+    require(currentSale.status == Status.notInitialized, "fail set status");
+    require(currentSale.freeze == false, "fail set freeze");
   }
 }
