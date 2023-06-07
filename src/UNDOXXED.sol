@@ -21,6 +21,7 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
   event SetSalePublicPrice(uint256 tokenId, uint256 newPublicPrice);
   event SetSaleWhitelistPrice(uint256 tokenId, uint256 newWhitelistPrice);
   event SetSaleStatus(uint256 _tokenId, Status newStatus);
+  event SetSaleSigner(uint256 tokenId, address newSigner);
   event FreezeSale(uint256 tokenId);
   event FreezeURI(uint256 tokenId);
 
@@ -31,7 +32,7 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
     _;
   }
 
-  function g(
+  function whitelistMint(
     uint256 _tokenId,
     uint256 _amountMint,
     uint256 _amountSign,
@@ -108,6 +109,12 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
     if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
     saleInfo[_tokenId].status = newStatus;
     emit SetSaleStatus(_tokenId, newStatus);
+  }
+
+  function setSaleSigner(uint256 _tokenId, address newSigner) external onlyOwner {
+    if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
+    saleInfo[_tokenId].signer = newSigner;
+    emit SetSaleSigner(_tokenId, newSigner);
   }
 
   /**
