@@ -9,6 +9,7 @@ error SaleFreeze();
 error SaleNotInitialised();
 error SaleNotStarted();
 error MaxPerWalletReach();
+error IncorrectValueSend();
 
 contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
   struct Sale {
@@ -28,7 +29,8 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
   }
 
   mapping(uint256 => Sale) private saleInfo;
-  mapping(address => uint256) private mintCount;
+  // address who mint => tokenId => mint count
+  mapping(address => mapping(uint256 => uint256)) private mintCount;
 
   event SetSale(uint256 tokenId, Sale saleInfo);
   event FreezeSale(uint256 tokenId);
@@ -47,10 +49,16 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
     emit FreezeSale(_tokenId);
   }
 
-  function mint(uint256 _tokenId, uint256 _amountMint) external payable {
+  function publicMint(uint256 _tokenId, uint256 _amountMint, bytes calldata data) external payable {
     if(saleInfo[_tokenId].status != Status.started) revert SaleNotStarted();
-    if(_amountMint + mintCount[msg.sender] > saleInfo[_tokenId].maxPerWallet) revert MaxPerWalletReach();
-    
+    if(_amountMint + mintCount[msg.sender][_tokenId] > saleInfo[_tokenId].maxPerWallet) revert MaxPerWalletReach();
+    if(msg.value < saleInfo[_tokenId].publicPrice) revert IncorrectValueSend();
+
+    _mint(msg.sender, _tokenId, _amountMint, data);
+
+    unchecked {
+      mintCount[msg.sender][_tokenId] += _amountMint;
+    }
   }
 
   // OVERRIDE FUNCTIONS
