@@ -65,7 +65,7 @@ contract CounterTest is Test {
     undoxxed.setNewSale(1, sale);
   }
 
-  function g() public {
+  function testPublicMint() public {
     Sale memory sale = setSale(100, 1 ether, 0.5 ether, 1);
     undoxxed.setNewSale(1, sale);
     undoxxed.setSaleStatus(1, Status.started);
@@ -75,5 +75,16 @@ contract CounterTest is Test {
     undoxxed.publicMint{value: 1 ether}(1, 1, "");
     uint256 balance = undoxxed.balanceOf(address(user1), 1);
     require(balance == 1, "fail mint for user1");
+  }
+
+  function testPublicMintFailInssuficientFunds() public {
+    Sale memory sale = setSale(100, 1 ether, 0.5 ether, 1);
+    undoxxed.setNewSale(1, sale);
+    undoxxed.setSaleStatus(1, Status.started);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    vm.expectRevert();
+    undoxxed.publicMint{value: 0.5 ether}(1, 1, "");
   }
 }
