@@ -6,6 +6,7 @@ struct Sale {
   uint256 maxSupply;
   uint256 publicPrice;
   uint256 whitelistPrice;
+  uint256 maxPerWalletWhitelist; // if maxPerWalletWhitelist == 0 use maxPerWallet else use maxPerWalletWhitelist
   uint256 maxPerWallet;
   Status status;
   bool freezeSale;

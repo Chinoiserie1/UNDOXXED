@@ -14,6 +14,7 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
   mapping(uint256 => Sale) private saleInfo;
   // address who mint => tokenId => mint count
   mapping(address => mapping(uint256 => uint256)) private mintCount;
+  mapping(address => mapping(uint256 => uint256)) private whitelistMintCount;
 
   event SetNewSale(uint256 tokenId, Sale newSale);
   event SetSaleMaxPerWallet(uint256 tokenId, uint256 newMaxPerWallet);
@@ -42,14 +43,16 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
     external payable verify(msg.sender, _tokenId, _amountSign, Status.whitelist, signature)
   {
     if (saleInfo[_tokenId].status != Status.whitelist) revert WhitelistSaleNotStarted();
-    if (mintCount[msg.sender][_tokenId] + _amountMint > saleInfo[_tokenId].maxPerWallet) revert MaxPerWalletReach();
     if (msg.value * _amountMint < saleInfo[_tokenId].whitelistPrice * _amountMint) revert IncorrectValueSend();
+    if (saleInfo[_tokenId].maxPerWalletWhitelist == 0) {
+      if (mintCount[msg.sender][_tokenId] + _amountMint > saleInfo[_tokenId].maxPerWallet) revert MaxPerWalletReach();
+      unchecked { mintCount[msg.sender][_tokenId] += _amountMint; }
+    } else {
+      if (whitelistMintCount[msg.sender][_tokenId] + _amountMint > saleInfo[_tokenId].maxPerWalletWhitelist) revert MaxPerWalletReach();
+      unchecked { whitelistMintCount[msg.sender][_tokenId] += _amountMint; }
+    }
 
     _mint(msg.sender, _tokenId, _amountMint, data);
-
-    unchecked {
-      mintCount[msg.sender][_tokenId] += _amountMint;
-    }
   }
 
   function publicMint(uint256 _tokenId, uint256 _amountMint, bytes calldata data) external payable {

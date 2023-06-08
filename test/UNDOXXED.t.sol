@@ -40,6 +40,7 @@ contract CounterTest is Test {
     uint256 maxSupply,
     uint256 publicPrice,
     uint256 whitelistPrice,
+    uint256 maxPerWalletWhitelist,
     uint256 maxPerWallet
   )
     public pure returns (Sale memory sale)
@@ -48,11 +49,12 @@ contract CounterTest is Test {
     sale.maxSupply = maxSupply;
     sale.publicPrice = publicPrice;
     sale.whitelistPrice = whitelistPrice;
+    sale.maxPerWalletWhitelist = maxPerWalletWhitelist;
     sale.maxPerWallet = maxPerWallet;
   }
 
   function testSetNewSale() public {
-    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 1);
+    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether,0, 1);
     undoxxed.setNewSale(1, sale);
     Sale memory currentSale = undoxxed.getSaleInfo(1);
     require(currentSale.maxSupply == 100, "fail set maxSupply");
@@ -67,13 +69,13 @@ contract CounterTest is Test {
   function testSetNewSaleFailNotOwner() public {
     vm.stopPrank();
     vm.startPrank(user1);
-    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 1);
+    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 1);
     vm.expectRevert();
     undoxxed.setNewSale(1, sale);
   }
 
   function testPublicMint() public {
-    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 1);
+    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 1);
     undoxxed.setNewSale(1, sale);
     undoxxed.setSaleStatus(1, Status.publicMint);
     vm.stopPrank();
@@ -85,7 +87,7 @@ contract CounterTest is Test {
   }
 
   function testPublicMintFailInsuficientFunds() public {
-    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 1);
+    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 1);
     undoxxed.setNewSale(1, sale);
     undoxxed.setSaleStatus(1, Status.publicMint);
     vm.stopPrank();
