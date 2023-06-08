@@ -99,8 +99,19 @@ contract CounterTest is Test {
     vm.stopPrank();
     vm.startPrank(user1);
     vm.deal(user1, 100 ether);
-    vm.expectRevert();
+    vm.expectRevert(IncorrectValueSend.selector);
     undoxxed.publicMint{value: 0.5 ether}(1, 1, "");
+  }
+
+  function testPublicMintFailMintCountExceedMaxPerWallet() public {
+    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 0, 1);
+    undoxxed.setNewSale(1, sale);
+    undoxxed.setSaleStatus(1, Status.publicMint);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    vm.expectRevert(MaxPerWalletReach.selector);
+    undoxxed.publicMint{value: 1 ether}(1, 2, "");
   }
 
   // URI
