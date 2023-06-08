@@ -76,6 +76,8 @@ contract CounterTest is Test {
     undoxxed.setNewSale(1, sale);
   }
 
+  // PUBLIC MINT
+
   function testPublicMint() public {
     Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 0, 1);
     undoxxed.setNewSale(1, sale);
@@ -101,10 +103,23 @@ contract CounterTest is Test {
     undoxxed.publicMint{value: 0.5 ether}(1, 1, "");
   }
 
+  // URI
+
   function testURI() public {
     string memory uri = "TheNewURI/";
     undoxxed.setURI(1, uri);
     string memory currentURI = undoxxed.uri(1);
     require(keccak256(abi.encode(uri)) == keccak256(abi.encode(currentURI)), "fail URI");
+  }
+
+  function testURIMultipleTokenId() public {
+    string memory uri = "TheNewURI/";
+    undoxxed.setURI(1, uri);
+    string memory currentURI = undoxxed.uri(1);
+    require(keccak256(abi.encode(uri)) == keccak256(abi.encode(currentURI)), "fail URI");
+    uri = "TheSecondNewURI/123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    undoxxed.setURI(2, uri);
+    currentURI = undoxxed.uri(2);
+    require(keccak256(abi.encode(uri)) == keccak256(abi.encode(currentURI)), "fail URI 2");
   }
 }
