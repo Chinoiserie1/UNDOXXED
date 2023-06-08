@@ -30,6 +30,7 @@ error SaleNotInitialized();
 error SaleAlreadyInitialized();
 error PublicSaleNotStarted();
 error WhitelistSaleNotStarted();
+error AllowlistNotStarted();
 error MaxSupplyReach();
 error MaxPerWalletReach();
 error IncorrectValueSend();
