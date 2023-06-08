@@ -114,6 +114,18 @@ contract CounterTest is Test {
     undoxxed.publicMint{value: 1 ether}(1, 2, "");
   }
 
+  function testPublicMintFailMintSecondTimeMintCountExceedMaxPerWallet() public {
+    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 0, 1);
+    undoxxed.setNewSale(1, sale);
+    undoxxed.setSaleStatus(1, Status.publicMint);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    undoxxed.publicMint{value: 1 ether}(1, 1, "");
+    vm.expectRevert(MaxPerWalletReach.selector);
+    undoxxed.publicMint{value: 1 ether}(1, 1, "");
+  }
+
   // URI
 
   function testURI() public {
