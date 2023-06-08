@@ -12,11 +12,15 @@ import "./verification/Verification.sol";
 
 contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
   mapping(uint256 => Sale) private saleInfo;
+
   // address who mint => tokenId => mint count
   mapping(address => mapping(uint256 => uint256)) private mintCount;
+  mapping(address => mapping(uint256 => uint256)) private allowlistMintCount;
   mapping(address => mapping(uint256 => uint256)) private whitelistMintCount;
 
   event SetNewSale(uint256 tokenId, Sale newSale);
+  event SetSaleMaxPerWalletAllowlist(uint256 tokenId, uint256 newMaxPerWallet);
+  event SetSaleMaxPerWalletWhitelist(uint256 tokenId, uint256 newMaxPerWallet);
   event SetSaleMaxPerWallet(uint256 tokenId, uint256 newMaxPerWallet);
   event SetSaleMaxSupply(uint256 tokenId, uint256 newMaxSupply);
   event SetSalePublicPrice(uint256 tokenId, uint256 newPublicPrice);
@@ -85,6 +89,20 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
     if (saleInfo[_tokenId].freezeSale) revert SaleFreeze();
     saleInfo[_tokenId].maxSupply = _maxSupply;
     emit SetSaleMaxSupply(_tokenId, _maxSupply);
+  }
+
+  function setSaleMaxPerWalletAllowlist(uint256 _tokenId, uint256 _maxPerWallet) external onlyOwner {
+    if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
+    if (saleInfo[_tokenId].freezeSale) revert SaleFreeze();
+    saleInfo[_tokenId].maxPerWalletAllowlist = _maxPerWallet;
+    emit SetSaleMaxPerWalletAllowlist(_tokenId, _maxPerWallet);
+  }
+
+  function setSaleMaxPerWalletWhitelist(uint256 _tokenId, uint256 _maxPerWallet) external onlyOwner {
+    if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
+    if (saleInfo[_tokenId].freezeSale) revert SaleFreeze();
+    saleInfo[_tokenId].maxPerWalletWhitelist = _maxPerWallet;
+    emit SetSaleMaxPerWalletWhitelist(_tokenId, _maxPerWallet);
   }
 
   function setSaleMaxPerWallet(uint256 _tokenId, uint256 _maxPerWallet) external onlyOwner {

@@ -6,6 +6,7 @@ struct Sale {
   uint256 maxSupply;
   uint256 publicPrice;
   uint256 whitelistPrice;
+  uint256 maxPerWalletAllowlist;
   uint256 maxPerWalletWhitelist; // if maxPerWalletWhitelist == 0 use maxPerWallet else use maxPerWalletWhitelist
   uint256 maxPerWallet;
   Status status;
@@ -16,7 +17,7 @@ struct Sale {
 enum Status {
   notInitialized,
   initialized,
-  allolist,
+  allowlist,
   whitelist,
   publicMint,
   finished,
