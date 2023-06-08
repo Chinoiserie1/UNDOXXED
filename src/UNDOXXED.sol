@@ -48,6 +48,7 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
   {
     if (saleInfo[_tokenId].status != Status.whitelist) revert WhitelistSaleNotStarted();
     if (msg.value * _amountMint < saleInfo[_tokenId].whitelistPrice * _amountMint) revert IncorrectValueSend();
+    if (_amountMint + totalSupply(_tokenId) > saleInfo[_tokenId].maxSupply) revert MaxSupplyReach();
     if (saleInfo[_tokenId].maxPerWalletWhitelist == 0) {
       if (mintCount[msg.sender][_tokenId] + _amountMint > saleInfo[_tokenId].maxPerWallet) revert MaxPerWalletReach();
       unchecked { mintCount[msg.sender][_tokenId] += _amountMint; }
@@ -63,6 +64,7 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
     if (saleInfo[_tokenId].status != Status.publicMint) revert PublicSaleNotStarted();
     if (_amountMint + mintCount[msg.sender][_tokenId] > saleInfo[_tokenId].maxPerWallet) revert MaxPerWalletReach();
     if (msg.value * _amountMint < saleInfo[_tokenId].publicPrice * _amountMint) revert IncorrectValueSend();
+    if (_amountMint + totalSupply(_tokenId) > saleInfo[_tokenId].maxSupply) revert MaxSupplyReach();
 
     _mint(msg.sender, _tokenId, _amountMint, data);
 

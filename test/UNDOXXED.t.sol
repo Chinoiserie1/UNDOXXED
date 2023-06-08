@@ -86,6 +86,8 @@ contract CounterTest is Test {
     undoxxed.publicMint{value: 1 ether}(1, 1, "");
     uint256 balance = undoxxed.balanceOf(address(user1), 1);
     require(balance == 1, "fail mint for user1");
+    uint256 totalSupply = undoxxed.totalSupply(1);
+    require(totalSupply == 1, "fail get totalSupply");
   }
 
   function testPublicMintFailInsuficientFunds() public {
