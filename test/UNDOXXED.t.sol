@@ -144,6 +144,14 @@ contract CounterTest is Test {
     undoxxed.publicMint{value: 1 ether}(1, 1, "");
   }
 
+  function testPublicMintFailSaleNotStarted() public {
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    vm.expectRevert(PublicSaleNotStarted.selector);
+    undoxxed.publicMint{value: 1 ether}(1, 1, "");
+  }
+
   function testPublicMintMintAllSupply() public {
     Sale memory sale = setSale(address(signer), 10, 1 ether, 0.5 ether, 0, 0, 10);
     undoxxed.setNewSale(1, sale);
