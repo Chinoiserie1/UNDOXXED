@@ -92,6 +92,24 @@ contract CounterTest is Test {
     require(totalSupply == 1, "fail get totalSupply");
   }
 
+  function testPublicMintWith2CallsSameUser() public {
+    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 0, 2);
+    undoxxed.setNewSale(1, sale);
+    undoxxed.setSaleStatus(1, Status.publicMint);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    undoxxed.publicMint{value: 1 ether}(1, 1, "");
+    uint256 balance = undoxxed.balanceOf(address(user1), 1);
+    require(balance == 1, "fail mint for user1");
+    uint256 totalSupply = undoxxed.totalSupply(1);
+    undoxxed.publicMint{value: 1 ether}(1, 1, "");
+    balance = undoxxed.balanceOf(address(user1), 1);
+    require(balance == 2, "fail mint for user1 second mint");
+    totalSupply = undoxxed.totalSupply(1);
+    require(totalSupply == 2, "fail get total supply second mint");
+  }
+
   function testPublicMintFailInsuficientFunds() public {
     Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 0, 1);
     undoxxed.setNewSale(1, sale);
