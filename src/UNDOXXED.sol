@@ -11,6 +11,11 @@ import "lib/Assembly/src/tokens/ERC1155/extensions/ERC1155Supply.sol";
 import "./IUNDOXXED.sol";
 import "./verification/Verification.sol";
 
+/**
+ * @title UNDOXXED
+ * @author chixx.eth
+ * @notice ERC1155 with extensions URIStorage and Supplyg
+ */
 contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
   mapping(uint256 => Sale) private saleInfo;
 
