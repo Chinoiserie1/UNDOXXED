@@ -6,6 +6,7 @@ import "lib/Assembly/src/tokens/ERC1155/extensions/ERC1155URIStorage.sol";
 import "lib/Assembly/src/tokens/ERC1155/extensions/ERC1155Supply.sol";
 
 // import "lib/openzeppelin-contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
+// import "lib/openzeppelin-contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 
 import "./IUNDOXXED.sol";
 import "./verification/Verification.sol";
@@ -96,11 +97,23 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
   }
 
   // VIEW FUNCTIONS
+
+  /**
+   * @notice return info of the sale
+   * @param _tokenId tokenId of the sale / id of the nft
+   */
   function getSaleInfo(uint256 _tokenId) external view returns (Sale memory sale) {
     return saleInfo[_tokenId];
   }
 
   // ONLY OWNER FUNCTIONS
+
+  /**
+   * @notice setNewSale aim to create a new sale
+   * @param _tokenId the tokenId of the new sale
+   * @param _newsale see { IUNDOXXED.sol }
+   * @dev 
+   */
   function setNewSale(uint256 _tokenId, Sale memory _newsale) external onlyOwner {
     if (saleInfo[_tokenId].status != Status.notInitialized) revert SaleAlreadyInitialized();
     saleInfo[_tokenId] = _newsale;
