@@ -14,7 +14,7 @@ import "./verification/Verification.sol";
 /**
  * @title UNDOXXED
  * @author chixx.eth
- * @notice ERC1155 with extensions URIStorage and Supplyg
+ * @notice ERC1155 with extensions URIStorage, Supply and Ownable
  */
 contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
   mapping(uint256 => Sale) private saleInfo;
@@ -38,11 +38,22 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
 
   constructor() ERC1155("UNDOXXED", "UNDX", "") {}
 
+  /**
+   * @notice verify signature
+   */
   modifier verify(address _to, uint256 _tokenId, uint256 _amount, Status _status, bytes memory _sign) {
     if (!Verification.verifySignature(saleInfo[_tokenId].signer, _to, _amount, _status, _sign)) revert invalidSignature();
     _;
   }
 
+  /**
+   * @notice function for mint in the allowlist status
+   * @param _tokenId tokenId of the sale / id of the nft
+   * @param _amountMint amount the user want to mint
+   * @param _amountSign amount given by the signer to the user to mint
+   * @param signature the signature of the signer
+   * @param data extra data { not needed here }
+   */
   function allowlistMint(
     uint256 _tokenId,
     uint256 _amountMint,
@@ -65,6 +76,14 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
     _mint(msg.sender, _tokenId, _amountMint, data);
   }
 
+  /**
+   * @notice function for mint in the whitelist status
+   * @param _tokenId tokenId of the sale / id of the nft
+   * @param _amountMint amount the user want to mint
+   * @param _amountSign amount given by the signer to the user to mint
+   * @param signature the signature of the signer
+   * @param data extra data { not needed here }
+   */
   function whitelistMint(
     uint256 _tokenId,
     uint256 _amountMint,
@@ -88,6 +107,12 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
     _mint(msg.sender, _tokenId, _amountMint, data);
   }
 
+  /**
+   * @notice function for mint in the public status
+   * @param _tokenId tokenId of the sale / id of the nft
+   * @param _amountMint amount the user want to mint
+   * @param data extra data { not needed here }
+   */
   function publicMint(uint256 _tokenId, uint256 _amountMint, bytes calldata data) external payable {
     if (saleInfo[_tokenId].status != Status.publicMint) revert PublicSaleNotStarted();
     if (_amountMint + mintCount[msg.sender][_tokenId] > saleInfo[_tokenId].maxPerWallet) revert MaxPerWalletReach();
@@ -153,6 +178,13 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
     emit SetSaleMaxPerWalletAllowlist(_tokenId, _maxPerWallet);
   }
 
+  /**
+   * @notice set max per wallet for whitelist
+   * @param _tokenId tokenId of the sale
+   * @param _maxPerWallet the new max per wallet a user can mint
+   * @dev sale must be initialized and not freeze
+   *      if set to 0 the max is max per wallet { saleInfo[id].maxPerWallet }
+   */
   function setSaleMaxPerWalletWhitelist(uint256 _tokenId, uint256 _maxPerWallet) external onlyOwner {
     if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
     if (saleInfo[_tokenId].freezeSale) revert SaleFreeze();
@@ -160,6 +192,12 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
     emit SetSaleMaxPerWalletWhitelist(_tokenId, _maxPerWallet);
   }
 
+  /**
+   * @notice set max per wallet
+   * @param _tokenId tokenId of the sale
+   * @param _maxPerWallet the new max per wallet a user can mint
+   * @dev sale must be initialized and not freeze
+   */
   function setSaleMaxPerWallet(uint256 _tokenId, uint256 _maxPerWallet) external onlyOwner {
     if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
     if (saleInfo[_tokenId].freezeSale) revert SaleFreeze();
@@ -167,6 +205,12 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
     emit SetSaleMaxPerWallet(_tokenId, _maxPerWallet);
   }
 
+   /**
+   * @notice set the price for public mint
+   * @param _tokenId tokenId of the sale
+   * @param _publicPrice the new price for public mint
+   * @dev sale must be initialized and not freeze
+   */
   function setSalePublicPrice(uint256 _tokenId, uint256 _publicPrice) external onlyOwner {
     if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
     if (saleInfo[_tokenId].freezeSale) revert SaleFreeze();
@@ -174,6 +218,12 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
     emit SetSalePublicPrice(_tokenId, _publicPrice);
   }
 
+  /**
+   * @notice set the price for whitelist mint
+   * @param _tokenId tokenId of the sale
+   * @param _whitelistPrice the new price for whitelist mint
+   * @dev sale must be initialized and not freeze
+   */
   function setSaleWhitelistPrice(uint256 _tokenId, uint256 _whitelistPrice) external onlyOwner {
     if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
     if (saleInfo[_tokenId].freezeSale) revert SaleFreeze();
@@ -181,12 +231,25 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
     emit SetSaleWhitelistPrice(_tokenId, _whitelistPrice);
   }
 
+  /**
+   * @notice set status for a specific sale
+   * @param _tokenId tokenId of the sale
+   * @param newStatus the new status of the sale
+   * @dev sale must be initialized
+   */
   function setSaleStatus(uint256 _tokenId, Status newStatus) external onlyOwner {
     if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
     saleInfo[_tokenId].status = newStatus;
     emit SetSaleStatus(_tokenId, newStatus);
   }
 
+  /**
+   * @notice set a new signer for signature
+   * @param _tokenId tokenId of the sale
+   * @param newSigner address of the new signer
+   * @dev sale must be initialized
+   *      if a signer change all precedent signature will be invalid
+   */
   function setSaleSigner(uint256 _tokenId, address newSigner) external onlyOwner {
     if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
     saleInfo[_tokenId].signer = newSigner;
@@ -203,12 +266,22 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
     emit FreezeSale(_tokenId);
   }
 
+  /**
+   * @notice freeze the URI of a specific tokenId
+   * @param _tokenId tokenId of the sale
+   */
   function freezeURI(uint256 _tokenId) external onlyOwner {
     if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
     saleInfo[_tokenId].freezeURI = true;
     emit FreezeURI(_tokenId);
   }
 
+  /**
+   * @notice set new URI for a specific tokenId
+   * @param _tokenId tokenId of the sale
+   * @param _tokenURI the new URI
+   * @dev URI must not be freeze
+   */
   function setURI(uint256 _tokenId, string calldata _tokenURI) external onlyOwner {
     if (saleInfo[_tokenId].freezeURI) revert URIFreeze();
     _setURI(_tokenId, _tokenURI);
