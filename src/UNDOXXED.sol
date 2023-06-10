@@ -121,6 +121,12 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
     emit SetNewSale(_tokenId, _newsale);
   }
 
+  /**
+   * @notice set max supply of a specific sale
+   * @param _tokenId tokenId of the sale
+   * @param _maxSupply the new max supply
+   * @dev sale must be initialized and not freeze
+   */
   function setSaleMaxSupply(uint256 _tokenId, uint256 _maxSupply) external onlyOwner {
     if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
     if (saleInfo[_tokenId].freezeSale) revert SaleFreeze();
@@ -128,6 +134,13 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
     emit SetSaleMaxSupply(_tokenId, _maxSupply);
   }
 
+  /**
+   * @notice set max per wallet a user can mint during allowlist
+   * @param _tokenId tokenId of the sale
+   * @param _maxPerWallet the new max per wallet a user can mint
+   * @dev sale must be initialized and not freeze
+   *      if set to 0 the max is max per wallet { saleInfo[id].maxPerWallet }
+   */
   function setSaleMaxPerWalletAllowlist(uint256 _tokenId, uint256 _maxPerWallet) external onlyOwner {
     if (saleInfo[_tokenId].status == Status.notInitialized) revert SaleNotInitialized();
     if (saleInfo[_tokenId].freezeSale) revert SaleFreeze();
