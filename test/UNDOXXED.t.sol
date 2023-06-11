@@ -165,6 +165,16 @@ contract CounterTest is Test {
     undoxxed.publicMint{value: 10 ether}(1, 10, "");
   }
 
+  // TEST SETTER
+
+  function testSetSaleMaxSupply() public {
+    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 0, 1);
+    undoxxed.setNewSale(1, sale);
+    undoxxed.setSaleMaxSupply(1, 200);
+    Sale memory currentSale = undoxxed.getSaleInfo(1);
+    require(currentSale.maxSupply == 200, "fail set max supply");
+  }
+
   // URI
 
   function testURI() public {
