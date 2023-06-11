@@ -175,6 +175,15 @@ contract CounterTest is Test {
     require(currentSale.maxSupply == 200, "fail set max supply");
   }
 
+  function testSetSaleMaxSupplyFailCallerNotOwner() public {
+    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 0, 1);
+    undoxxed.setNewSale(1, sale);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.expectRevert();
+    undoxxed.setSaleMaxSupply(1, 200);
+  }
+
   // URI
 
   function testURI() public {
