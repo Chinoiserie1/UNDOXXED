@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 import "forge-std/Test.sol";
 import "../src/UNDOXXED.sol";
 import "../src/IUNDOXXED.sol";
+import "../src/verification/Verification.sol";
 
 contract CounterTest is Test {
   UNDOXXED public undoxxed;
@@ -62,6 +63,8 @@ contract CounterTest is Test {
     require(currentSale.maxSupply == 100, "fail set maxSupply");
     require(currentSale.publicPrice == 1 ether, "fail set public price");
     require(currentSale.whitelistPrice == 0.5 ether, "fail set whitelist price");
+    require(currentSale.maxPerWalletAllowlist == 0, "fail set max per wallet allowlist");
+    require(currentSale.maxPerWalletWhitelist == 0, "fail set max per wallet whitelist");
     require(currentSale.maxPerWallet == 1, "fail set max per wallet");
     require(currentSale.status == Status.initialized, "fail set status");
     require(currentSale.freezeSale == false, "fail set freeze sale");
