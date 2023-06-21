@@ -247,6 +247,14 @@ contract CounterTest is Test {
     require(sale.status == Status.whitelist, "fail set new status whitelist");
   }
 
+  function testSetSaleSigner() public {
+    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 0, 1);
+    undoxxed.setNewSale(1, sale);
+    undoxxed.setSaleSigner(1, address(user1));
+    sale = undoxxed.getSaleInfo(1);
+    require(sale.signer == address(user1), "fail set new signer");
+  }
+
   // URI
 
   function testURI() public {
