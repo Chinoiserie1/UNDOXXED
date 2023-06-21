@@ -184,6 +184,15 @@ contract CounterTest is Test {
     undoxxed.setSaleMaxSupply(1, 200);
   }
 
+  function testSetSaleMaxPerWalletAllowlist() public {
+    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 0, 1);
+    undoxxed.setNewSale(1, sale);
+    undoxxed.setSaleStatus(1, Status.allowlist);
+    undoxxed.setSaleMaxPerWalletAllowlist(1, 2);
+    sale = undoxxed.getSaleInfo(1);
+    require(sale.maxPerWalletAllowlist == 2, "fail set max per wallet allolist");
+  }
+
   // URI
 
   function testURI() public {
