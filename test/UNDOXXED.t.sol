@@ -216,6 +216,14 @@ contract CounterTest is Test {
     require(sale.publicPrice == 10 ether, "fail set public price");
   }
 
+  function testSetSaleWhitelistPrice() public {
+    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 0, 1);
+    undoxxed.setNewSale(1, sale);
+    undoxxed.setSaleWhitelistPrice(1, 10 ether);
+    sale = undoxxed.getSaleInfo(1);
+    require(sale.whitelistPrice == 10 ether, "fail set public price");
+  }
+
   // URI
 
   function testURI() public {
