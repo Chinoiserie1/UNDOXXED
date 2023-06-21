@@ -221,7 +221,30 @@ contract CounterTest is Test {
     undoxxed.setNewSale(1, sale);
     undoxxed.setSaleWhitelistPrice(1, 10 ether);
     sale = undoxxed.getSaleInfo(1);
-    require(sale.whitelistPrice == 10 ether, "fail set public price");
+    require(sale.whitelistPrice == 10 ether, "fail set whitelist price");
+  }
+
+  function testSetSaleStatus() public {
+    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 0, 1);
+    undoxxed.setNewSale(1, sale);
+    undoxxed.setSaleStatus(1, Status.initialized);
+    sale = undoxxed.getSaleInfo(1);
+    require(sale.status == Status.initialized, "fail set new status initialized");
+    undoxxed.setSaleStatus(1, Status.allowlist);
+    sale = undoxxed.getSaleInfo(1);
+    require(sale.status == Status.allowlist, "fail set new status allowlist");
+    undoxxed.setSaleStatus(1, Status.finished);
+    sale = undoxxed.getSaleInfo(1);
+    require(sale.status == Status.finished, "fail set new status finished");
+    undoxxed.setSaleStatus(1, Status.paused);
+    sale = undoxxed.getSaleInfo(1);
+    require(sale.status == Status.paused, "fail set new status paused");
+    undoxxed.setSaleStatus(1, Status.publicMint);
+    sale = undoxxed.getSaleInfo(1);
+    require(sale.status == Status.publicMint, "fail set new status publicMint");
+    undoxxed.setSaleStatus(1, Status.whitelist);
+    sale = undoxxed.getSaleInfo(1);
+    require(sale.status == Status.whitelist, "fail set new status whitelist");
   }
 
   // URI
