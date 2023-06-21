@@ -187,7 +187,6 @@ contract CounterTest is Test {
   function testSetSaleMaxPerWalletAllowlist() public {
     Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 0, 1);
     undoxxed.setNewSale(1, sale);
-    undoxxed.setSaleStatus(1, Status.allowlist);
     undoxxed.setSaleMaxPerWalletAllowlist(1, 2);
     sale = undoxxed.getSaleInfo(1);
     require(sale.maxPerWalletAllowlist == 2, "fail set max per wallet allolist");
@@ -196,10 +195,17 @@ contract CounterTest is Test {
   function testSetMaxPerWalletWhitelist() public {
     Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 0, 1);
     undoxxed.setNewSale(1, sale);
-    undoxxed.setSaleStatus(1, Status.whitelist);
     undoxxed.setSaleMaxPerWalletWhitelist(1, 2);
     sale = undoxxed.getSaleInfo(1);
     require(sale.maxPerWalletWhitelist == 2, "fail set max per wallet whitelist");
+  }
+
+  function testSetSaleMaxPerWallet() public {
+    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 0, 1);
+    undoxxed.setNewSale(1, sale);
+    undoxxed.setSaleMaxPerWallet(1, 2);
+    sale = undoxxed.getSaleInfo(1);
+    require(sale.maxPerWallet == 2, "fail set max per wallet whitelist");
   }
 
   // URI
