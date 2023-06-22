@@ -263,6 +263,14 @@ contract CounterTest is Test {
     require(sale.freezeSale == true, "fail freeze sale");
   }
 
+  function testFreezeURI() public {
+    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 0, 1);
+    undoxxed.setNewSale(1, sale);
+    undoxxed.freezeURI(1);
+    sale = undoxxed.getSaleInfo(1);
+    require(sale.freezeURI == true, "fail freeze URI");
+  }
+
   // URI
 
   function testURI() public {
