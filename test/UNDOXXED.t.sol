@@ -103,6 +103,18 @@ contract CounterTest is Test {
     require(totalSupply == 1, "fail get totalSupply");
   }
 
+  function testAllowlistMaxPerWalletAllowlist() public {
+    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 3, 0, 1);
+    undoxxed.setNewSale(1, sale);
+    undoxxed.setSaleStatus(1, Status.allowlist);
+    bytes memory signature = sign(address(user1), 3, Status.allowlist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    undoxxed.allowlistMint(1, 3, 3, signature, "");
+    uint256 balance = undoxxed.balanceOf(address(user1), 1);
+    require(balance == 3, "fail mint for user1");
+  }
+
   function testAllowlistFailIncorrectSignature() public {
     Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 0, 1);
     undoxxed.setNewSale(1, sale);
