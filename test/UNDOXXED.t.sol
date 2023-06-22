@@ -56,6 +56,14 @@ contract CounterTest is Test {
     sale.maxPerWallet = maxPerWallet;
   }
 
+  function sign(address _to, uint256 _amount, Status _status) public view returns(bytes memory) {
+    bytes32 messaggeHash = Verification.getMessageHash(_to, _amount, _status);
+    bytes32 finalHash = Verification.getEthSignedMessageHash(messaggeHash);
+    (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPrivateKey, finalHash);
+    bytes memory signature = abi.encodePacked(r, s, v);
+    return signature;
+  }
+
   function testSetNewSale() public {
     Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 0, 1);
     undoxxed.setNewSale(1, sale);
@@ -77,6 +85,22 @@ contract CounterTest is Test {
     Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 0, 1);
     vm.expectRevert();
     undoxxed.setNewSale(1, sale);
+  }
+
+  // ALLOWLIST MINT
+
+  function testAllowlist() public {
+    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 0, 1);
+    undoxxed.setNewSale(1, sale);
+    undoxxed.setSaleStatus(1, Status.allowlist);
+    bytes memory signature = sign(address(user1), 1, Status.allowlist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    undoxxed.allowlistMint(1, 1, 1, signature, "");
+    uint256 balance = undoxxed.balanceOf(address(user1), 1);
+    require(balance == 1, "fail mint for user1");
+    uint256 totalSupply = undoxxed.totalSupply(1);
+    require(totalSupply == 1, "fail get totalSupply");
   }
 
   // PUBLIC MINT
