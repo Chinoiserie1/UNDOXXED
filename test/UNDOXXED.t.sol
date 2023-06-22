@@ -124,6 +124,17 @@ contract CounterTest is Test {
     undoxxed.allowlistMint(1, 1, 1, signature, "");
   }
 
+  function testAllowlistFailMaxPerWalletReach() public {
+    Sale memory sale = setSale(address(signer), 100, 1 ether, 0.5 ether, 0, 0, 1);
+    undoxxed.setNewSale(1, sale);
+    undoxxed.setSaleStatus(1, Status.allowlist);
+    bytes memory signature = sign(address(user1), 2, Status.allowlist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.expectRevert(MaxPerWalletReach.selector);
+    undoxxed.allowlistMint(1, 2, 2, signature, "");
+  }
+
   // PUBLIC MINT
 
   function testPublicMint() public {
