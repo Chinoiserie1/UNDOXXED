@@ -2,11 +2,12 @@
 pragma solidity ^0.8.19;
 
 import "lib/Assembly/src/access/Ownable.sol";
-import "lib/Assembly/src/tokens/ERC1155/extensions/ERC1155URIStorage.sol";
-import "lib/Assembly/src/tokens/ERC1155/extensions/ERC1155Supply.sol";
+// import "lib/Assembly/src/tokens/ERC1155/extensions/ERC1155URIStorage.sol";
+// import "lib/Assembly/src/tokens/ERC1155/extensions/ERC1155Supply.sol";
 
-// import "lib/openzeppelin-contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
-// import "lib/openzeppelin-contracts/token/ERC1155/extensions/ERC1155Supply.sol";
+import "lib/openzeppelin-contracts/contracts/token/common/ERC2981.sol";
+import "lib/openzeppelin-contracts/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
+import "lib/openzeppelin-contracts/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 
 import "./IUNDOXXED.sol";
 import "./verification/Verification.sol";
@@ -14,9 +15,9 @@ import "./verification/Verification.sol";
 /**
  * @title UNDOXXED
  * @author chixx.eth
- * @notice ERC1155 with extensions URIStorage, Supply and Ownable
+ * @notice ERC1155 with extensions URIStorage, Supply, Royalties and Ownable
  */
-contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
+contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, ERC2981, Ownable {
   mapping(uint256 => Sale) private saleInfo;
 
   // address who mint => tokenId => mint count
@@ -36,7 +37,9 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
   event FreezeSale(uint256 tokenId);
   event FreezeURI(uint256 tokenId);
 
-  constructor() ERC1155("UNDOXXED", "UNDX", "") {}
+  constructor() ERC1155("") {
+    _setDefaultRoyalty(msg.sender, 500);
+  }
 
   /**
    * @notice verify signature
@@ -127,6 +130,14 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
   }
 
   // VIEW FUNCTIONS
+
+  function name() external pure returns(string memory) {
+    return "UNDOXXED";
+  }
+
+  function symbol() external pure returns(string memory) {
+    return "UNDX";
+  }
 
   /**
    * @notice return info of the sale
@@ -288,7 +299,15 @@ contract UNDOXXED is ERC1155URIStorage, ERC1155Supply, Ownable {
     emit URI(_tokenURI, _tokenId);
   }
 
+  function setDefaultRoyalties(address _recipient, uint96 _feeNumerator) external onlyOwner {
+    _setDefaultRoyalty(_recipient, _feeNumerator);
+  }
+
   // OVERRIDE FUNCTIONS
+  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, ERC2981) returns (bool) {
+    return super.supportsInterface(interfaceId);
+  }
+
   function uri(uint256 tokenId) public view virtual override(ERC1155, ERC1155URIStorage) returns (string memory) {
     return super.uri(tokenId);
   }
