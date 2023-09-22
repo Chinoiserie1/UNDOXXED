@@ -9,3 +9,7 @@
 	path = lib/openzeppelin-contracts
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
 	branch = v4.9.1
+[submodule "lib/opengem-contracts"]
+	path = lib/opengem-contracts
+	url = https://github.com/OpenGem-Standard/opengem-contracts
+	branch = 1.1.4
