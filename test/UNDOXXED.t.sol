@@ -2,9 +2,9 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
-import "../src/UNDOXXED.sol";
-import "../src/IUNDOXXED.sol";
-import "../src/verification/Verification.sol";
+import "../src/ERC1155/UNDOXXED.sol";
+import "../src/ERC1155/IUNDOXXED.sol";
+import "../src/ERC1155/verification/Verification.sol";
 
 contract CounterTest is Test {
   UNDOXXED public undoxxed;
