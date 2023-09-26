@@ -36,11 +36,17 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
   mapping(address => bool) private fiatPayment;
   mapping(address => mapping(uint256 => uint256)) private mintPerWallet;
 
+  /**
+   * @notice check if the contract is freeze
+   */
   modifier freezed {
     if (contractFreeze) revert contractFreezed();
     _;
   }
 
+  /**
+   * @notice check the current status
+   */
   modifier checkStatus(Status _status) {
     if (status != _status) revert invalidSaleStatus();
     _;
@@ -62,6 +68,8 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
   }
 
   constructor () ERC721("UNDOXXED", "UNDX") {}
+
+  // MINT FUNCTIONS
 
   function allowlistMint(address _to, uint256 _amount1, uint256 _amount2, bytes memory _sign)
     external
@@ -115,6 +123,8 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
     _mintToken2(_to, _amount2);
   }
 
+  // SETTER FUNCTIONS
+
   function setStatus(Status _newStatus) external onlyOwner freezed {
     status = _newStatus;
   }
@@ -131,10 +141,26 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
     contractFreeze = true;
   }
 
+  function addPermanentBaseURI(string calldata prefixURI, string calldata suffixURI) external onlyOwner {
+    _addPermanentBaseURI(prefixURI, suffixURI);
+  }
+
+  function addPermanentTokenURI(uint256 tokenId, string calldata permanentTokenURI) external onlyOwner {
+    _addPermanentTokenURI(tokenId, permanentTokenURI);
+  }
+
+  function addPermanentGlobalURI(string calldata permanentGlobalUri) external onlyOwner {
+    _addPermanentGlobalURI(permanentGlobalUri);
+  }
+
   // OVERRIDE FUNCTIONS
 
   function supportsInterface(bytes4 interfaceId) public view virtual override(ERC2981, ERC721Enumerable) returns (bool) {
     return super.supportsInterface(interfaceId);
+  }
+
+  function _burn(uint256 tokenId) internal override(ERC721, ERC721PermanentURIs) {
+    super._burn(tokenId);
   }
 
   // INTERNAL FUNCTIONS
