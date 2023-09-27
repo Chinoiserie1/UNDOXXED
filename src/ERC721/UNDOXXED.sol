@@ -18,6 +18,8 @@ error maxMintWalletReachToken1();
 error maxMintWalletReachToken2();
 error invalidSaleStatus();
 error invalidSignature();
+error exceedAllowedToken1Mint();
+error exceedAllowedToken2Mint();
 
 contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
   uint256 private maxSupply = 500;
@@ -35,6 +37,8 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
 
   mapping(address => bool) private fiatPayment;
   mapping(address => mapping(uint256 => uint256)) private mintPerWallet;
+  mapping(bytes => uint256) private signatureCheckToken1;
+  mapping(bytes => uint256) private signatureCheckToken2;
 
   /**
    * @notice check if the contract is freeze
@@ -71,7 +75,14 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
 
   // MINT FUNCTIONS
 
-  function allowlistMint(address _to, uint256 _amount1, uint256 _amount2, bytes memory _sign)
+  function allowlistMint(
+    address _to,
+    uint256 _amount1,
+    uint256 _amount2,
+    uint256 _amount1Sign,
+    uint256 _amount2Sign,
+    bytes memory _sign
+  )
     external
     checkStatus(Status.allowlist)
     verify(_to, _amount1, _amount2, Status.allowlist, _sign)
@@ -81,12 +92,26 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
     }
     if (mintPerWallet[_to][1] + _amount1 > maxMintWallet) revert maxMintWalletReachToken1();
     if (mintPerWallet[_to][2] + _amount2 > maxMintWallet) revert maxMintWalletReachToken1();
+    if (_amount1 + signatureCheckToken1[_sign] > _amount1Sign) revert exceedAllowedToken1Mint();
+    if (_amount2 + signatureCheckToken2[_sign] > _amount2Sign) revert exceedAllowedToken2Mint();
+
+    unchecked {
+      signatureCheckToken1[_sign] += amount1;
+      signatureCheckToken2[_sign] += amount2;
+    }
 
     _mintToken1(_to, _amount1);
     _mintToken2(_to, _amount2);
   }
 
-  function whitelistMint(address _to, uint256 _amount1, uint256 _amount2, bytes memory _sign)
+  function whitelistMint(
+    address _to,
+    uint256 _amount1,
+    uint256 _amount2,
+    uint256 _amount1Sign,
+    uint256 _amount2Sign,
+    bytes memory _sign
+  )
     external
     payable
     checkStatus(Status.whitelist)
@@ -97,8 +122,15 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
     }
     if (mintPerWallet[_to][1] + _amount1 > maxMintWallet) revert maxMintWalletReachToken1();
     if (mintPerWallet[_to][2] + _amount2 > maxMintWallet) revert maxMintWalletReachToken1();
+    if (_amount1 + signatureCheckToken1[_sign] > _amount1Sign) revert exceedAllowedToken1Mint();
+    if (_amount2 + signatureCheckToken2[_sign] > _amount2Sign) revert exceedAllowedToken2Mint();
     unchecked {
       if ((_amount1 + _amount2) * whitelistPrice > msg.value) revert invalidAmountSend();
+    }
+
+    unchecked {
+      signatureCheckToken1[_sign] += amount1;
+      signatureCheckToken2[_sign] += amount2;
     }
 
     _mintToken1(_to, _amount1);
@@ -129,8 +161,20 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
     status = _newStatus;
   }
 
+  function setSigner(address _newSigner) external onlyOwner freezed {
+    signer = _newSigner;
+  }
+
   function setMaxMintWallet(uint256 _newMaxMintWallet) external onlyOwner freezed {
     maxMintWallet = _newMaxMintWallet;
+  }
+
+  function setWhitelistPrice(uint256 _newWhitelistPrice) external onlyOwner freezed {
+    whitelistPrice = _newWhitelistPrice;
+  }
+
+  function setPublicPrice(uint256 _newPublicPrice) external onlyOwner freezed {
+    publicPrice = _newPublicPrice;
   }
 
   function setDefaultRoyalties(address _recipient, uint96 _feeNumerator) external onlyOwner {
