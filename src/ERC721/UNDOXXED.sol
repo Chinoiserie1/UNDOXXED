@@ -85,7 +85,7 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
   )
     external
     checkStatus(Status.allowlist)
-    verify(_to, _amount1, _amount2, Status.allowlist, _sign)
+    verify(_to, _amount1Sign, _amount2Sign, Status.allowlist, _sign)
   {
     if (msg.sender != _to) {
       if (!fiatPayment[msg.sender]) revert onlyApprovedPaymentAddress();
@@ -115,7 +115,7 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
     external
     payable
     checkStatus(Status.whitelist)
-    verify(_to, _amount1, _amount2, Status.whitelist, _sign)
+    verify(_to, _amount1Sign, _amount2Sign, Status.whitelist, _sign)
   {
     if (msg.sender != _to) {
       if (!fiatPayment[msg.sender]) revert onlyApprovedPaymentAddress();
