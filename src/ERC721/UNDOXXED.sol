@@ -22,6 +22,9 @@ error exceedAllowedToken1Mint();
 error exceedAllowedToken2Mint();
 
 contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
+  string private baseURI;
+  string private sufixURI;
+
   uint256 private maxSupply = 500;
   uint256 private maxMintWallet = 5;
   uint256 private token1 = 1;
@@ -185,6 +188,14 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
     contractFreeze = true;
   }
 
+  function setBaseURI(string calldata _newBaseURI) external onlyOwner freezed {
+    baseURI = _newBaseURI;
+  }
+
+  function setSufixURI(string calldata _newSufixURI) external onlyOwner freezed {
+    sufixURI = _newSufixURI;
+  }
+
   function addPermanentBaseURI(string calldata prefixURI, string calldata suffixURI) external onlyOwner {
     _addPermanentBaseURI(prefixURI, suffixURI);
   }
@@ -201,6 +212,12 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
 
   function supportsInterface(bytes4 interfaceId) public view virtual override(ERC2981, ERC721Enumerable) returns (bool) {
     return super.supportsInterface(interfaceId);
+  }
+
+  function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+    if (!_exists(tokenId)) return "";
+
+    return string(abi.encodePacked(baseURI, tokenId.toString(), sufixURI));
   }
 
   function _burn(uint256 tokenId) internal override(ERC721, ERC721PermanentURIs) {
