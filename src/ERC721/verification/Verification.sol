@@ -4,7 +4,7 @@ pragma solidity ^0.8.19;
 import { Status } from "../IUNDOXXED.sol";
 
 library Verification {
-  function getMessageHash(address _to, uint256 _amount1, uint256 _amount2, Status _status) public pure returns (bytes32) {
+  function getMessageHash(address _to, uint256 _amount1, uint256 _amount2, Status _status) internal pure returns (bytes32) {
     return keccak256(
       abi.encodePacked(
         _to,
@@ -35,7 +35,7 @@ library Verification {
 
   function getEthSignedMessageHash(
     bytes32 _messageHash
-  ) public pure returns (bytes32) {
+  ) internal pure returns (bytes32) {
     /*
     Signature is produced by signing a keccak256 hash with the following format:
     "\x19Ethereum Signed Message\n" + len(msg) + msg

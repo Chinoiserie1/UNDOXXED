@@ -21,6 +21,11 @@ error invalidSignature();
 error exceedAllowedToken1Mint();
 error exceedAllowedToken2Mint();
 
+/**
+ * @title UNDOXXED Book
+ * @author chixx.eth
+ * @notice ERC721 with 3 types of mint
+ */
 contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
   using Strings for uint256;
 
