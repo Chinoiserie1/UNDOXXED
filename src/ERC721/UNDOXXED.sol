@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.21;
+pragma solidity ^0.8.19;
 
 import "lib/Assembly/src/access/Ownable.sol";
 
@@ -22,8 +22,10 @@ error exceedAllowedToken1Mint();
 error exceedAllowedToken2Mint();
 
 contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
-  string private baseURI;
-  string private sufixURI;
+  using Strings for uint256;
+
+  string private baseURI = "YOUR BASE URI/";
+  string private sufixURI = ".json";
 
   uint256 private maxSupply = 500;
   uint256 private maxMintWallet = 5;
@@ -99,8 +101,8 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
     if (_amount2 + signatureCheckToken2[_sign] > _amount2Sign) revert exceedAllowedToken2Mint();
 
     unchecked {
-      signatureCheckToken1[_sign] += amount1;
-      signatureCheckToken2[_sign] += amount2;
+      signatureCheckToken1[_sign] += _amount1;
+      signatureCheckToken2[_sign] += _amount2;
     }
 
     _mintToken1(_to, _amount1);
@@ -132,8 +134,8 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
     }
 
     unchecked {
-      signatureCheckToken1[_sign] += amount1;
-      signatureCheckToken2[_sign] += amount2;
+      signatureCheckToken1[_sign] += _amount1;
+      signatureCheckToken2[_sign] += _amount2;
     }
 
     _mintToken1(_to, _amount1);
@@ -208,9 +210,21 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
     _addPermanentGlobalURI(permanentGlobalUri);
   }
 
+  // VIEW FUNCTIONS
+
+  function getCurrentStatus() external view returns (Status) {
+    return status;
+  }
+
   // OVERRIDE FUNCTIONS
 
-  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC2981, ERC721Enumerable) returns (bool) {
+  function supportsInterface(bytes4 interfaceId)
+    public
+    view
+    virtual
+    override(ERC2981, ERC721, ERC721Enumerable)
+    returns(bool)
+  {
     return super.supportsInterface(interfaceId);
   }
 
@@ -222,6 +236,15 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
 
   function _burn(uint256 tokenId) internal override(ERC721, ERC721PermanentURIs) {
     super._burn(tokenId);
+  }
+
+  function _beforeTokenTransfer(
+    address from,
+    address to,
+    uint256 firstTokenId,
+    uint256 batchSize
+  ) internal virtual override(ERC721, ERC721Enumerable) {
+    super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
   }
 
   // INTERNAL FUNCTIONS
