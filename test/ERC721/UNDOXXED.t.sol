@@ -59,6 +59,24 @@ contract UNDOXXEDTest is Test {
     require(undoxxed.balanceOf(user1) == 10, "fail mint in allowlist");
   }
 
+  function testAllowlistMintFuzzAmountMint(uint256 _amount1, uint256 _amount2) public {
+    undoxxed.setStatus(Status.allowlist);
+    bytes memory signature = sign(user1, 5, 5, Status.allowlist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    if (_amount1 < 6 && _amount2 < 6) {
+      undoxxed.allowlistMint(user1, _amount1, _amount2, 5, 5, signature);
+      require(undoxxed.balanceOf(user1) == _amount1 + _amount2, "fail mint in allowlist");
+    } else {
+      if (_amount1 > 5 ) {
+        vm.expectRevert(maxMintWalletReachToken1.selector);
+      } else if (_amount2 > 5 ) {
+        vm.expectRevert(maxMintWalletReachToken2.selector);
+      }
+      undoxxed.allowlistMint(user1, _amount1, _amount2, 5, 5, signature);
+    }
+  }
+
   function testAllowlistMintLowerThanAllowed() public {
     undoxxed.setStatus(Status.allowlist);
     bytes memory signature = sign(user1, 5, 5, Status.allowlist);

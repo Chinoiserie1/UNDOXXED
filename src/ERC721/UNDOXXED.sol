@@ -101,7 +101,7 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
       if (!fiatPayment[msg.sender]) revert onlyApprovedPaymentAddress();
     }
     if (mintPerWallet[_to][1] + _amount1 > maxMintWallet) revert maxMintWalletReachToken1();
-    if (mintPerWallet[_to][2] + _amount2 > maxMintWallet) revert maxMintWalletReachToken1();
+    if (mintPerWallet[_to][2] + _amount2 > maxMintWallet) revert maxMintWalletReachToken2();
     if (_amount1 + signatureCheckToken1[_sign] > _amount1Sign) revert exceedAllowedToken1Mint();
     if (_amount2 + signatureCheckToken2[_sign] > _amount2Sign) revert exceedAllowedToken2Mint();
 
@@ -131,7 +131,7 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
       if (!fiatPayment[msg.sender]) revert onlyApprovedPaymentAddress();
     }
     if (mintPerWallet[_to][1] + _amount1 > maxMintWallet) revert maxMintWalletReachToken1();
-    if (mintPerWallet[_to][2] + _amount2 > maxMintWallet) revert maxMintWalletReachToken1();
+    if (mintPerWallet[_to][2] + _amount2 > maxMintWallet) revert maxMintWalletReachToken2();
     if (_amount1 + signatureCheckToken1[_sign] > _amount1Sign) revert exceedAllowedToken1Mint();
     if (_amount2 + signatureCheckToken2[_sign] > _amount2Sign) revert exceedAllowedToken2Mint();
     unchecked {
@@ -156,7 +156,7 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
       if (!fiatPayment[msg.sender]) revert onlyApprovedPaymentAddress();
     }
     if (mintPerWallet[_to][1] + _amount1 > maxMintWallet) revert maxMintWalletReachToken1();
-    if (mintPerWallet[_to][2] + _amount2 > maxMintWallet) revert maxMintWalletReachToken1();
+    if (mintPerWallet[_to][2] + _amount2 > maxMintWallet) revert maxMintWalletReachToken2();
     unchecked {
       if ((_amount1 + _amount2) * publicPrice > msg.value) revert invalidAmountSend();
     }
