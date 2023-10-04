@@ -56,6 +56,16 @@ contract UNDOXXEDTest is Test {
     vm.stopPrank();
     vm.startPrank(user1);
     undoxxed.allowlistMint(user1, 5, 5, 5, 5, signature);
+    require(undoxxed.balanceOf(user1) == 10, "fail mint in allowlist");
+  }
+
+  function testAllowlistMintLowerThanAllowed() public {
+    undoxxed.setStatus(Status.allowlist);
+    bytes memory signature = sign(user1, 5, 5, Status.allowlist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    undoxxed.allowlistMint(user1, 2, 2, 5, 5, signature);
+    require(undoxxed.balanceOf(user1) == 4, "fail mint in allowlist");
   }
 
   // test setter
