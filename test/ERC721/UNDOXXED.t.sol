@@ -86,6 +86,14 @@ contract UNDOXXEDTest is Test {
     require(undoxxed.balanceOf(user1) == 4, "fail mint in allowlist");
   }
 
+  function testAllowlistShouldFailWrongStatus() public {
+    bytes memory signature = sign(user1, 5, 5, Status.allowlist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.expectRevert(invalidSaleStatus.selector);
+    undoxxed.allowlistMint(user1, 5, 5, 5, 5, signature);
+  }
+
   function testAllowlistMintGreaterThanAllowedShouldFail() public {
     undoxxed.setStatus(Status.allowlist);
     bytes memory signature = sign(user1, 5, 5, Status.allowlist);
