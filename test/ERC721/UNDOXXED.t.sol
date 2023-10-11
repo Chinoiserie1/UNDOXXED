@@ -189,6 +189,19 @@ contract UNDOXXEDTest is Test {
     require(undoxxed.getCurrentStatus() == Status.allowlist, "fail set status");
   }
 
+  function testSetWhitelistPrice() public {
+    undoxxed.setWhitelistPrice(0.2 ether);
+    undoxxed.setStatus(Status.whitelist);
+    bytes memory signature = sign(user1, 5, 5, Status.whitelist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    undoxxed.whitelistMint{value: 0.2 ether}(user1, 1, 0, 5, 5, signature);
+    require(undoxxed.balanceOf(user1) == 1, "fail set whitelist price");
+    vm.expectRevert(invalidAmountSend.selector);
+    undoxxed.whitelistMint{value: 0.1 ether}(user1, 1, 0, 5, 5, signature);
+  }
+
   function testSetStatusFailNotOwner() public {
     vm.stopPrank();
     vm.prank(user1);
