@@ -127,6 +127,16 @@ contract UNDOXXEDTest is Test {
     require(undoxxed.balanceOf(user1) == 10, "fail mint in whitelist");
   }
 
+  function testWhitelistMintShouldFailInvalidAmountSend() public {
+    undoxxed.setStatus(Status.whitelist);
+    bytes memory signature = sign(user1, 5, 5, Status.whitelist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    vm.expectRevert(invalidAmountSend.selector);
+    undoxxed.whitelistMint{value: 0.5 ether}(user1, 5, 5, 5, 5, signature);
+  }
+
   // test setter
 
   function testSetStatus() public {
