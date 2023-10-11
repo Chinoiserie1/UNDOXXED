@@ -128,7 +128,7 @@ contract UNDOXXEDTest is Test {
   }
 
   function testWhitelistMintFuzz(uint256 _amount1, uint256 _amount2) public {
-    vm.deal(user1, 1000000000000 ether);
+    vm.deal(user1, uint256(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF));
     undoxxed.setStatus(Status.whitelist);
     bytes memory signature = sign(user1, 5, 5, Status.whitelist);
     vm.stopPrank();
