@@ -150,6 +150,18 @@ contract UNDOXXEDTest is Test {
     }
   }
 
+  function testWhitelistMintShouldSuccessMultipleCall() public {
+    undoxxed.setStatus(Status.whitelist);
+    bytes memory signature = sign(user1, 5, 5, Status.whitelist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    undoxxed.whitelistMint{value: 0.2 ether}(user1, 2, 0, 5, 5, signature);
+    require(undoxxed.balanceOf(user1) == 2, "fail mint in whitelist");
+    undoxxed.whitelistMint{value: 0.8 ether}(user1, 3, 5, 5, 5, signature);
+    require(undoxxed.balanceOf(user1) == 10, "fail mint in whitelist in second call");
+  }
+
   function testWhitelistMintShouldFailInvalidUser() public {
     undoxxed.setStatus(Status.whitelist);
     bytes memory signature = sign(user1, 5, 5, Status.whitelist);
