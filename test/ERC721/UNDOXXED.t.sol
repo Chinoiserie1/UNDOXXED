@@ -127,6 +127,29 @@ contract UNDOXXEDTest is Test {
     require(undoxxed.balanceOf(user1) == 10, "fail mint in whitelist");
   }
 
+  function testWhitelistMintFuzz(uint256 _amount1, uint256 _amount2) public {
+    vm.deal(user1, 1000000000000 ether);
+    undoxxed.setStatus(Status.whitelist);
+    bytes memory signature = sign(user1, 5, 5, Status.whitelist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    uint256 amountToSend;
+    unchecked {
+      amountToSend = 0.1 ether * (_amount1 + _amount2);
+    }
+    if (_amount1 < 6 && _amount2 < 6) {
+      undoxxed.whitelistMint{value: amountToSend}(user1, _amount1, _amount2, 5, 5, signature);
+      require(undoxxed.balanceOf(user1) == _amount1 + _amount2, "fail mint in whitelist");
+    } else {
+      if (_amount1 > 5) {
+        vm.expectRevert();
+      } else if (_amount2 > 5) {
+        vm.expectRevert();
+      }
+      undoxxed.whitelistMint{value: amountToSend}(user1, _amount1, _amount2, 5, 5, signature);
+    }
+  }
+
   function testWhitelistMintShouldFailInvalidAmountSend() public {
     undoxxed.setStatus(Status.whitelist);
     bytes memory signature = sign(user1, 5, 5, Status.whitelist);
