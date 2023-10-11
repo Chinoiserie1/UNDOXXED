@@ -50,6 +50,7 @@ contract UNDOXXEDTest is Test {
   }
 
   // test allowlist
+
   function testAllowlistMint() public {
     undoxxed.setStatus(Status.allowlist);
     bytes memory signature = sign(user1, 5, 5, Status.allowlist);
@@ -112,6 +113,18 @@ contract UNDOXXEDTest is Test {
     require(undoxxed.balanceOf(user1) == 4, "fail mint in allowlist");
     vm.expectRevert(maxMintWalletReachToken1.selector);
     undoxxed.allowlistMint(user1, 4, 3, 5, 5, signature);
+  }
+
+  // test whitelist
+
+  function testWhitelistMintShouldSuccess() public {
+    undoxxed.setStatus(Status.whitelist);
+    bytes memory signature = sign(user1, 5, 5, Status.whitelist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    undoxxed.whitelistMint{value: 1 ether}(user1, 5, 5, 5, 5, signature);
+    require(undoxxed.balanceOf(user1) == 10, "fail mint in whitelist");
   }
 
   // test setter
