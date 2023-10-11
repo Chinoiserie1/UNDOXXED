@@ -150,6 +150,16 @@ contract UNDOXXEDTest is Test {
     }
   }
 
+  function testWhitelistMintShouldFailInvalidUser() public {
+    undoxxed.setStatus(Status.whitelist);
+    bytes memory signature = sign(user1, 5, 5, Status.whitelist);
+    vm.stopPrank();
+    vm.startPrank(user2);
+    vm.deal(user2, 100 ether);
+    vm.expectRevert(invalidSignature.selector);
+    undoxxed.whitelistMint{value: 1 ether}(user2, 5, 5, 5, 5, signature);
+  }
+
   function testWhitelistMintShouldFailInvalidAmountSend() public {
     undoxxed.setStatus(Status.whitelist);
     bytes memory signature = sign(user1, 5, 5, Status.whitelist);
