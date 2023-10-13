@@ -10,3 +10,15 @@ enum Status {
   paused
 }
 
+error contractFreezed();
+error onlyApprovedPaymentAddress();
+error maxSupplyToken1Reach();
+error maxSupplyToken2Reach();
+error invalidAmountSend();
+error maxMintWalletReachToken1();
+error maxMintWalletReachToken2();
+error invalidSaleStatus();
+error invalidSignature();
+error exceedAllowedToken1Mint();
+error exceedAllowedToken2Mint();
+
