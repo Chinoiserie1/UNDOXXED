@@ -226,6 +226,13 @@ contract UNDOXXEDTest is Test {
     require(undoxxed.getCurrentStatus() == Status.allowlist, "fail set status");
   }
 
+  function testSetStatusFailOnlyOwner() public {
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.expectRevert();
+    undoxxed.setStatus(Status.allowlist);
+  }
+
   function testSetWhitelistPrice() public {
     undoxxed.setWhitelistPrice(0.2 ether);
     undoxxed.setStatus(Status.whitelist);
