@@ -218,7 +218,13 @@ contract UNDOXXEDTest is Test {
     vm.stopPrank();
     vm.startPrank(user1);
     undoxxed.mint{value: 0.15 ether}(user1, 1, 0);
-    string memory tokeURI = undoxxed.tokenURI(1);
-    require(keccak256(bytes(expectedURI)) == keccak256(bytes(tokeURI)), "fail get correct URI");
+    string memory tokenURI = undoxxed.tokenURI(1);
+    require(keccak256(bytes(expectedURI)) == keccak256(bytes(tokenURI)), "fail get correct URI");
+  }
+
+  function testTokenURIShouldReturnNothingWhenNotExistingTokenId() public view {
+    string memory expectedURI = "";
+    string memory tokenURI = undoxxed.tokenURI(1);
+    require(keccak256(bytes(expectedURI)) == keccak256(bytes(tokenURI)), "fail get correct URI");
   }
 }
