@@ -256,7 +256,7 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
 
   function _mintToken1(address _to, uint256 _amount) internal {
     unchecked {
-      if (token1 + _amount > 250) revert maxSupplyToken1Reach();
+      if (token1 + _amount > 251) revert maxSupplyToken1Reach();
       for (uint256 i = 0; i < _amount; ++i) {
         _mint(_to, token1);
         ++token1;
@@ -267,7 +267,7 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
 
   function _mintToken2(address _to, uint256 _amount) internal {
     unchecked {
-      if (token2 + _amount > 500) revert maxSupplyToken2Reach();
+      if (token2 + _amount > 501) revert maxSupplyToken2Reach();
       for (uint256 i = 0; i < _amount; ++i) {
         _mint(_to, token2);
         ++token2;
