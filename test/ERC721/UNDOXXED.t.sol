@@ -137,6 +137,21 @@ contract UNDOXXEDTest is Test {
     undoxxed.allowlistMint(user1, 4, 3, 5, 5, signature);
   }
 
+  function testAllowlistMintMoreThanAllSupplyShouldFail() public {
+    undoxxed.setStatus(Status.allowlist);
+    undoxxed.setMaxMintWallet(300);
+    bytes memory signature = sign(user1, 250, 250, Status.allowlist);
+    bytes memory signature2 = sign(user2, 250, 250, Status.allowlist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    undoxxed.allowlistMint(user1, 250, 250, 250, 250, signature);
+    require(undoxxed.balanceOf(user1) == 500, "fail mint all supply in allowlist");
+    vm.stopPrank();
+    vm.startPrank(user2);
+    vm.expectRevert(maxSupplyToken1Reach.selector);
+    undoxxed.allowlistMint(user2, 1, 1, 250, 250, signature2);
+  }
+
   // test whitelist
 
   function testWhitelistMintShouldSuccess() public {
