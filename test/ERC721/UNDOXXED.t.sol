@@ -233,6 +233,19 @@ contract UNDOXXEDTest is Test {
     undoxxed.setStatus(Status.allowlist);
   }
 
+  function testSetSigner() public {
+    undoxxed.setSigner(user2);
+    undoxxed.setStatus(Status.allowlist);
+    bytes32 messaggeHash = Verification.getMessageHash(user1, 5, 5, Status.allowlist);
+    bytes32 finalHash = Verification.getEthSignedMessageHash(messaggeHash);
+    (uint8 v, bytes32 r, bytes32 s) = vm.sign(user2PrivateKey, finalHash);
+    bytes memory signature = abi.encodePacked(r, s, v);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    undoxxed.allowlistMint(user1, 5, 5, 5, 5, signature);
+    require(undoxxed.balanceOf(user1) == 10, "fail mint in allowlist");
+  }
+
   function testSetWhitelistPrice() public {
     undoxxed.setWhitelistPrice(0.2 ether);
     undoxxed.setStatus(Status.whitelist);
