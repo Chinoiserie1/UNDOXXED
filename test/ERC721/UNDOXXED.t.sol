@@ -208,4 +208,17 @@ contract UNDOXXEDTest is Test {
     vm.expectRevert();
     undoxxed.setStatus(Status.allowlist);
   }
+
+  // test view
+
+  function testTokenURIReturnInfo() public {
+    string memory expectedURI = "YOUR BASE URI/1.json";
+    undoxxed.setStatus(Status.publicMint);
+    vm.deal(user1, 10 ether);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    undoxxed.mint{value: 0.15 ether}(user1, 1, 0);
+    string memory tokeURI = undoxxed.tokenURI(1);
+    require(keccak256(bytes(expectedURI)) == keccak256(bytes(tokeURI)), "fail get correct URI");
+  }
 }
