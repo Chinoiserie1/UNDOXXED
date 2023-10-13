@@ -246,6 +246,13 @@ contract UNDOXXEDTest is Test {
     require(undoxxed.balanceOf(user1) == 10, "fail mint in allowlist");
   }
 
+  function testSetSignerFailOnlyOwner() public {
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.expectRevert();
+    undoxxed.setSigner(user2);
+  }
+
   function testSetWhitelistPrice() public {
     undoxxed.setWhitelistPrice(0.2 ether);
     undoxxed.setStatus(Status.whitelist);
