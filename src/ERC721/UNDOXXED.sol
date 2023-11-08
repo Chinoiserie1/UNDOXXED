@@ -163,9 +163,8 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
     bytes memory _sign
   ) external payable 
   {
-    if (msg.sender != _to) {
-      if (!fiatPayment[msg.sender]) revert onlyApprovedPaymentAddress();
-    } else revert onlyApprovedPaymentAddress();
+    if (status != Status.allowlist || status != Status.whitelist) revert invalidSaleStatus();
+    if (!fiatPayment[msg.sender]) revert onlyApprovedPaymentAddress();
 
     if (status == Status.whitelist) {
       if (!Verification.verifySignature(signer, _to, _amount1Sign, _amount2Sign, status, _sign))
@@ -254,11 +253,11 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
   }
 
   function getToken2Supply() external view returns (uint256) {
-    return token2 - 251;
+    return token2 - 101;
   }
 
   function getAllSupply() external view returns (uint256) {
-    return token1 + token2 - 252;
+    return token1 + token2 - 102;
   }
 
   // OVERRIDE FUNCTIONS
