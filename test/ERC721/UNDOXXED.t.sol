@@ -20,6 +20,10 @@ contract UNDOXXEDTest is Test {
   uint256 internal signerPrivateKey;
   address internal signer;
 
+  uint256 internal maxSupply = 200;
+  uint256 internal maxSupplyToken1 = 100;
+  uint256 internal maxSupplyToken2 = 100;
+
   function setUp() public {
     ownerPrivateKey = 0xA11CE;
     owner = vm.addr(ownerPrivateKey);
@@ -43,6 +47,14 @@ contract UNDOXXEDTest is Test {
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPrivateKey, finalHash);
     bytes memory signature = abi.encodePacked(r, s, v);
     return signature;
+  }
+
+  function testGetMessageHash() public view {
+    bytes32 messageHash = Verification.getMessageHash(0x90D41fA17a8dF96E7dff80227b4FC7d208dFd026, 2, 2, Status.whitelist);
+    bytes32 finalHash = Verification.getEthSignedMessageHash(messageHash);
+    (uint8 v, bytes32 r, bytes32 s) = vm.sign(0x9d6f0e5dfdfc148bc2c37813b396e3d0feea887a72070d010e32576bc63aa3e1, finalHash);
+    bytes memory signature = abi.encodePacked(r, s, v);
+    console.logBytes(signature);
   }
 
   function testStatus() public view {
@@ -93,8 +105,8 @@ contract UNDOXXEDTest is Test {
     bytes memory signature = sign(user1, 250, 250, Status.allowlist);
     vm.stopPrank();
     vm.startPrank(user1);
-    undoxxed.allowlistMint(user1, 250, 250, 250, 250, signature);
-    require(undoxxed.balanceOf(user1) == 500, "fail mint all supply in allowlist");
+    undoxxed.allowlistMint(user1, maxSupplyToken1, maxSupplyToken2, 250, 250, signature);
+    require(undoxxed.balanceOf(user1) == maxSupply, "fail mint all supply in allowlist");
   }
 
   function testAllowlistMintAllSupplyMultipleCall() public {
@@ -103,10 +115,10 @@ contract UNDOXXEDTest is Test {
     bytes memory signature = sign(user1, 250, 250, Status.allowlist);
     vm.stopPrank();
     vm.startPrank(user1);
-    undoxxed.allowlistMint(user1, 249, 249, 250, 250, signature);
-    require(undoxxed.balanceOf(user1) == 498, "fail mint all supply in allowlist");
+    undoxxed.allowlistMint(user1, maxSupplyToken1 - 1, maxSupplyToken2 - 1, 250, 250, signature);
+    require(undoxxed.balanceOf(user1) == maxSupply - 2, "fail mint all supply in allowlist");
     undoxxed.allowlistMint(user1, 1, 1, 250, 250, signature);
-    require(undoxxed.balanceOf(user1) == 500, "fail mint all supply in allowlist");
+    require(undoxxed.balanceOf(user1) == maxSupply, "fail mint all supply in allowlist");
   }
 
   function testAllowlistShouldFailWrongStatus() public {
