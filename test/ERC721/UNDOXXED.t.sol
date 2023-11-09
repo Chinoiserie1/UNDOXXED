@@ -139,7 +139,7 @@ contract UNDOXXEDTest is Test {
     bytes memory signature = sign(user1, 5, 5, Status.allowlist);
     vm.stopPrank();
     vm.startPrank(user1);
-    vm.expectRevert(maxMintWalletReachToken1.selector);
+    vm.expectRevert(exceedAllowedToken1Mint.selector);
     undoxxed.allowlistMint(user1, 6, 6, 5, 5, signature);
   }
 
@@ -150,7 +150,7 @@ contract UNDOXXEDTest is Test {
     vm.startPrank(user1);
     undoxxed.allowlistMint(user1, 2, 2, 5, 5, signature);
     require(undoxxed.balanceOf(user1) == 4, "fail mint in allowlist");
-    vm.expectRevert(maxMintWalletReachToken1.selector);
+    vm.expectRevert(exceedAllowedToken1Mint.selector);
     undoxxed.allowlistMint(user1, 4, 3, 5, 5, signature);
   }
 
@@ -161,8 +161,8 @@ contract UNDOXXEDTest is Test {
     bytes memory signature2 = sign(user2, 250, 250, Status.allowlist);
     vm.stopPrank();
     vm.startPrank(user1);
-    undoxxed.allowlistMint(user1, 250, 250, 250, 250, signature);
-    require(undoxxed.balanceOf(user1) == 500, "fail mint all supply in allowlist");
+    undoxxed.allowlistMint(user1, maxSupplyToken1, maxSupplyToken2, 250, 250, signature);
+    require(undoxxed.balanceOf(user1) == maxSupply, "fail mint all supply in allowlist");
     vm.stopPrank();
     vm.startPrank(user2);
     vm.expectRevert(maxSupplyToken1Reach.selector);
