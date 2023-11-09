@@ -15,7 +15,7 @@ contract UNDOXXEDTest is Test {
   address internal user1;
   uint256 internal user2PrivateKey;
   address internal user2;
-  int256 internal user3PrivateKey;
+  uint256 internal user3PrivateKey;
   address internal user3;
   uint256 internal signerPrivateKey;
   address internal signer;
@@ -23,6 +23,9 @@ contract UNDOXXEDTest is Test {
   uint256 internal maxSupply = 200;
   uint256 internal maxSupplyToken1 = 100;
   uint256 internal maxSupplyToken2 = 100;
+
+  uint256 internal whitelistPrice;
+  uint256 internal publicPrice;
 
   function setUp() public {
     ownerPrivateKey = 0xA11CE;
@@ -32,13 +35,15 @@ contract UNDOXXEDTest is Test {
     user2PrivateKey = 0xFE55E;
     user2 = vm.addr(user2PrivateKey);
     user3PrivateKey = 0xD1C;
-    user3 = vm.addr(user2PrivateKey);
+    user3 = vm.addr(user3PrivateKey);
     signerPrivateKey = 0xF10;
     signer = vm.addr(signerPrivateKey);
     vm.startPrank(owner);
 
     undoxxed = new UNDOXXED();
     undoxxed.setSigner(signer);
+    whitelistPrice = undoxxed.getWhitelistPrice();
+    publicPrice = undoxxed.getPublicPrice();
   }
 
   function sign(address _to, uint256 _amount1, uint256 _amount2, Status _status) public view returns(bytes memory) {
@@ -82,9 +87,9 @@ contract UNDOXXEDTest is Test {
       require(undoxxed.balanceOf(user1) == _amount1 + _amount2, "fail mint in allowlist");
     } else {
       if (_amount1 > 5 ) {
-        vm.expectRevert(maxMintWalletReachToken1.selector);
+        vm.expectRevert(exceedAllowedToken1Mint.selector);
       } else if (_amount2 > 5 ) {
-        vm.expectRevert(maxMintWalletReachToken2.selector);
+        vm.expectRevert(exceedAllowedToken2Mint.selector);
       }
       undoxxed.allowlistMint(user1, _amount1, _amount2, 5, 5, signature);
     }
@@ -228,7 +233,60 @@ contract UNDOXXEDTest is Test {
     vm.startPrank(user1);
     vm.deal(user1, 100 ether);
     vm.expectRevert(invalidAmountSend.selector);
-    undoxxed.whitelistMint{value: 0.5 ether}(user1, 5, 5, 5, 5, signature);
+    undoxxed.whitelistMint{value: whitelistPrice * 9}(user1, 5, 5, 5, 5, signature);
+  }
+
+  // test mint
+
+  // test fiat payment
+
+  function testFiatPaymentMintWhitelist() public {
+    undoxxed.setStatus(Status.whitelist);
+    undoxxed.setFiatPayment(user1);
+    vm.deal(user1, 100 ether);
+    bytes memory signature = sign(user2, 5, 5, Status.whitelist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    undoxxed.fiatPaymentMint{value : whitelistPrice * 10}(user2, 5, 5, 5, 5, signature);
+    require(undoxxed.balanceOf(user2) == 10, "fail fiat payement mint");
+  }
+
+  function testFiatPaymentMintShouldFailInvalidStatus() public {
+    undoxxed.setStatus(Status.allowlist);
+    undoxxed.setFiatPayment(user1);
+    vm.deal(user1, 100 ether);
+    bytes memory signature = sign(user2, 5, 5, Status.whitelist);
+    vm.stopPrank();
+    vm.prank(user1);
+    vm.expectRevert(invalidSaleStatus.selector);
+    undoxxed.fiatPaymentMint{value : whitelistPrice * 10}(user2, 5, 5, 5, 5, signature);
+    vm.prank(owner);
+    undoxxed.setStatus(Status.finished);
+    vm.prank(user1);
+    vm.expectRevert(invalidSaleStatus.selector);
+    undoxxed.fiatPaymentMint{value : whitelistPrice * 10}(user2, 5, 5, 5, 5, signature);
+  }
+
+  function testFiatPaymentMintShouldFailtInvalidAmountSend() public {
+    undoxxed.setStatus(Status.whitelist);
+    undoxxed.setFiatPayment(user1);
+    vm.deal(user1, 100 ether);
+    bytes memory signature = sign(user2, 5, 5, Status.whitelist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.expectRevert(invalidAmountSend.selector);
+    undoxxed.fiatPaymentMint{value : whitelistPrice * 9}(user2, 5, 5, 5, 5, signature);
+  }
+
+  function testFiatPaymentMintShouldFailInvalidSignature() public {
+    undoxxed.setStatus(Status.whitelist);
+    undoxxed.setFiatPayment(user1);
+    vm.deal(user1, 100 ether);
+    bytes memory signature = sign(user3, 5, 5, Status.whitelist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.expectRevert(invalidSignature.selector);
+    undoxxed.fiatPaymentMint{value : whitelistPrice * 10}(user2, 5, 5, 5, 5, signature);
   }
 
   // test setter

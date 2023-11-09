@@ -163,7 +163,7 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
     bytes memory _sign
   ) external payable 
   {
-    if (status != Status.allowlist || status != Status.whitelist) revert invalidSaleStatus();
+    // if (status != Status.whitelist || status != Status.publicMint) revert invalidSaleStatus();
     if (!fiatPayment[msg.sender]) revert onlyApprovedPaymentAddress();
 
     if (status == Status.whitelist) {
@@ -176,12 +176,16 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
       }
     }
 
-    if (status == Status.publicMint) {
+    else if (status == Status.publicMint) {
       if (mintPerWallet[_to][1] + _amount1 > maxMintWallet) revert maxMintWalletReachToken1();
       if (mintPerWallet[_to][2] + _amount2 > maxMintWallet) revert maxMintWalletReachToken2();
       unchecked {
         if ((_amount1 + _amount2) * publicPrice > msg.value) revert invalidAmountSend();
       }
+    }
+
+    else {
+      revert invalidSaleStatus();
     }
 
     _mintToken1(_to, _amount1);
@@ -260,6 +264,13 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
     return token1 + token2 - 102;
   }
 
+  function getWhitelistPrice() external view returns (uint256) {
+    return whitelistPrice;
+  }
+
+  function getPublicPrice() external view returns (uint256) {
+    return publicPrice;
+  }
   // OVERRIDE FUNCTIONS
 
   function supportsInterface(bytes4 interfaceId)
