@@ -28,7 +28,7 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
   uint256 private whitelistPrice = 0.001 ether;
   uint256 private publicPrice = 0.0015 ether;
 
-  address private signer;
+  address private signer = 0x90D41fA17a8dF96E7dff80227b4FC7d208dFd026;
 
   bool private contractFreeze;
 
@@ -163,7 +163,6 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
     bytes memory _sign
   ) external payable 
   {
-    // if (status != Status.whitelist || status != Status.publicMint) revert invalidSaleStatus();
     if (!fiatPayment[msg.sender]) revert onlyApprovedPaymentAddress();
 
     if (status == Status.whitelist) {
