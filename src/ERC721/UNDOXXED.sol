@@ -115,7 +115,7 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
     payable
     verify(_to, _amount1Sign, _amount2Sign, Status.whitelist, _sign)
   {
-    if (status != Status.whitelist || status != Status.publicMint) revert invalidSaleStatus();
+    if (status != Status.whitelist && status != Status.publicMint) revert invalidSaleStatus();
     if (msg.sender != _to) {
       if (!fiatPayment[msg.sender]) revert onlyApprovedPaymentAddress();
     }
