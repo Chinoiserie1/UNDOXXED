@@ -21,4 +21,6 @@ error invalidSaleStatus();
 error invalidSignature();
 error exceedAllowedToken1Mint();
 error exceedAllowedToken2Mint();
+error failWhithdraw();
+error whithdrawZeroValue();
 

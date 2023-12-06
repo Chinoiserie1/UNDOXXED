@@ -56,7 +56,7 @@ contract UNDOXXEDTest is Test {
 
   function testGetMessageHash() public view {
     uint256 pk = vm.envUint("PRIVATE_KEY");
-    bytes32 messageHash = Verification.getMessageHash(0x90D41fA17a8dF96E7dff80227b4FC7d208dFd026, 10, 10, Status.allowlist);
+    bytes32 messageHash = Verification.getMessageHash(0x0a19B1b44B6b3D97C125c2D126beD4b734C500C0, 10, 10, Status.whitelist);
     bytes32 finalHash = Verification.getEthSignedMessageHash(messageHash);
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(pk, finalHash);
     bytes memory signature = abi.encodePacked(r, s, v);
@@ -361,5 +361,23 @@ contract UNDOXXEDTest is Test {
     string memory expectedURI = "";
     string memory tokenURI = undoxxed.tokenURI(1);
     require(keccak256(bytes(expectedURI)) == keccak256(bytes(tokenURI)), "fail get correct URI");
+  }
+
+  // test withdraw
+
+  function testWithdraw() public {
+    undoxxed.setStatus(Status.publicMint);
+    vm.deal(user1, 10 ether);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    undoxxed.mint{value: publicPrice * 20}(user1, 10, 10);
+    require(undoxxed.balanceOf(user1) == 20, "fail mint public");
+    vm.stopPrank();
+    vm.startPrank(owner);
+    uint256 balanceOwnerBefore = address(owner).balance;
+    undoxxed.withdraw();
+    uint256 balanceOwnerAfter = address(owner).balance;
+    require(balanceOwnerBefore < balanceOwnerAfter, "fail withdraw");
+    require(balanceOwnerAfter == publicPrice * 20, "fail withdraw exact value");
   }
 }

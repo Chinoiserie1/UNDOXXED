@@ -189,6 +189,15 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
     _mintToken2(_to, _amount2);
   }
 
+  // WHITHDRAW
+
+  function withdraw() external onlyOwner {
+    uint256 value = address(this).balance;
+    if (value == 0) revert whithdrawZeroValue();
+    (bool success, ) = address(msg.sender).call{value: address(this).balance}("");
+    if (!success) revert failWhithdraw();
+  }
+
   // SETTER FUNCTIONS
 
   function setStatus(Status _newStatus) external onlyOwner freezed {
