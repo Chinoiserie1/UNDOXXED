@@ -237,6 +237,16 @@ contract UNDOXXEDTest is Test {
     undoxxed.whitelistMint{value: whitelistPrice * 9}(user1, 5, 5, 5, 5, signature);
   }
 
+  function testWhitelistMintShouldSuccessPublicPhase() public {
+    undoxxed.setStatus(Status.publicMint);
+    bytes memory signature = sign(user1, 5, 5, Status.whitelist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    undoxxed.whitelistMint{value: 1 ether}(user1, 5, 5, 5, 5, signature);
+    require(undoxxed.balanceOf(user1) == 10, "fail mint in whitelist");
+  }
+
   // test mint
 
   // test fiat payment
