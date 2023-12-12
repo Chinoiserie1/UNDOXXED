@@ -428,4 +428,19 @@ contract UNDOXXEDTest is Test {
     require(balanceOwnerBefore < balanceOwnerAfter, "fail withdraw");
     require(balanceOwnerAfter == publicPrice * 20, "fail withdraw exact value");
   }
+
+  // test opengem
+
+  function testPermanentProof() public {
+    string memory proof = "MY PROOF";
+    undoxxed.setStatus(Status.publicMint);
+    undoxxed.setTokenProof1(proof);
+    vm.deal(user1, 10 ether);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    undoxxed.mint{value: publicPrice * 1}(user1, 1, 0);
+    require(undoxxed.balanceOf(user1) == 1, "fail mint public");
+    string memory proofGet = undoxxed.tokenProofPermanent(1);
+    require(keccak256(bytes(proofGet)) == keccak256(bytes(proof)), "fail get the correct proof");
+  }
 }
