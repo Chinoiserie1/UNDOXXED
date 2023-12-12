@@ -6,6 +6,7 @@ import "lib/Assembly/src/access/Ownable.sol";
 import "lib/openzeppelin-contracts/contracts/token/common/ERC2981.sol";
 import "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "lib/opengem-contracts/token/ERC721/extensions/ERC721PermanentURIs.sol";
+import "lib/opengem-contracts/token/ERC721/extensions/ERC721PermanentProof.sol";
 
 import "./IUNDOXXED.sol";
 import "./verification/Verification.sol";
@@ -15,12 +16,14 @@ import "./verification/Verification.sol";
  * @author chixx.eth
  * @notice ERC721 with 3 types of mint
  */
-contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
+contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ERC721PermanentProof {
   using Strings for uint256;
 
   string private baseURI = "YOUR BASE URI/";  
   string private baseMediaURICover1 = "YOUR BASE URI/";
   string private baseMediaURICover2 = "YOUR BASE URI/";
+  string private tokenProof1;
+  string private tokenProof2;
   string private sufixURI = ".json";
 
   uint256 private maxSupply = 200;
@@ -244,6 +247,14 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
     baseMediaURICover2 = _newBaseURI;
   }
 
+  function setTokenProof1(string calldata _tokenProof) external onlyOwner {
+    tokenProof1 = _tokenProof;
+  }
+
+  function setTokenProof2(string calldata _tokenProof) external onlyOwner {
+    tokenProof2 = _tokenProof;
+  }
+
   function setSufixURI(string calldata _newSufixURI) external onlyOwner freezed {
     sufixURI = _newSufixURI;
   }
@@ -312,7 +323,7 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
     return string(abi.encodePacked(baseURI, tokenId.toString(), sufixURI));
   }
 
-  function _burn(uint256 tokenId) internal override(ERC721, ERC721PermanentURIs) {
+  function _burn(uint256 tokenId) internal override(ERC721, ERC721PermanentURIs, ERC721PermanentProof) {
     super._burn(tokenId);
   }
 
@@ -333,6 +344,7 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
       for (uint256 i = 0; i < _amount; ++i) {
         _mint(_to, token1);
         _addPermanentTokenURI(token1, baseMediaURICover1);
+        _setPermanentTokenProof(token1, tokenProof1);
         ++token1;
       }
       mintPerWallet[_to][1] += _amount;
@@ -345,6 +357,7 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs {
       for (uint256 i = 0; i < _amount; ++i) {
         _mint(_to, token2);
         _addPermanentTokenURI(token2, baseMediaURICover2);
+        _setPermanentTokenProof(token2, tokenProof2);
         ++token2;
       }
       mintPerWallet[_to][2] += _amount;

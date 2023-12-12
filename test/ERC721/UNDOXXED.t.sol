@@ -182,6 +182,16 @@ contract UNDOXXEDTest is Test {
     require(undoxxed.balanceOf(user1) == 10, "fail mint in whitelist");
   }
 
+  function testWhitelistMintShouldSuccessPublicPhase() public {
+    undoxxed.setStatus(Status.publicMint);
+    bytes memory signature = sign(user1, 5, 5, Status.whitelist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    undoxxed.whitelistMint{value: 1 ether}(user1, 5, 5, 5, 5, signature);
+    require(undoxxed.balanceOf(user1) == 10, "fail mint in whitelist");
+  }
+
   function testWhitelistMintFuzz(uint256 _amount1, uint256 _amount2) public {
     vm.deal(user1, uint256(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF));
     undoxxed.setStatus(Status.whitelist);
@@ -237,17 +247,34 @@ contract UNDOXXEDTest is Test {
     undoxxed.whitelistMint{value: whitelistPrice * 9}(user1, 5, 5, 5, 5, signature);
   }
 
-  function testWhitelistMintShouldSuccessPublicPhase() public {
+  // test mint
+
+  function testPublicMintShouldSuccess() public {
     undoxxed.setStatus(Status.publicMint);
-    bytes memory signature = sign(user1, 5, 5, Status.whitelist);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.deal(user1, 100 ether);
-    undoxxed.whitelistMint{value: 1 ether}(user1, 5, 5, 5, 5, signature);
-    require(undoxxed.balanceOf(user1) == 10, "fail mint in whitelist");
+    undoxxed.mint{value: publicPrice * 20}(user1, 10, 10);
+    require(undoxxed.balanceOf(user1) == 20, "fail mint in public");
   }
 
-  // test mint
+  function testPublicMintShouldRevertInvalidAmountSend() public {
+    undoxxed.setStatus(Status.publicMint);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    vm.expectRevert(invalidAmountSend.selector);
+    undoxxed.mint{value: publicPrice * 19}(user1, 10, 10);
+  }
+
+  function testPublicMintShouldRevertMintMoreThamAllowed() public {
+    undoxxed.setStatus(Status.publicMint);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    vm.expectRevert(maxMintWalletReachToken1.selector);
+    undoxxed.mint{value: publicPrice * 21}(user1, 11, 10);
+  }
 
   // test fiat payment
 
