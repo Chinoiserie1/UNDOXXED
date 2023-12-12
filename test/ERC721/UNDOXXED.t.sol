@@ -258,6 +258,17 @@ contract UNDOXXEDTest is Test {
     require(undoxxed.balanceOf(user1) == 20, "fail mint in public");
   }
 
+  function testPublicMIntShouldSuccessMultipleCall() public {
+    undoxxed.setStatus(Status.publicMint);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    undoxxed.mint{value: publicPrice * 10}(user1, 5, 5);
+    require(undoxxed.balanceOf(user1) == 10, "fail mint in public");
+    undoxxed.mint{value: publicPrice * 10}(user1, 5, 5);
+    require(undoxxed.balanceOf(user1) == 20, "fail mint in public");
+  }
+
   function testPublicMintShouldRevertInvalidAmountSend() public {
     undoxxed.setStatus(Status.publicMint);
     vm.stopPrank();
