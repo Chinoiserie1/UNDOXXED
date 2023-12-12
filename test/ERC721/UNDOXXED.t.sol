@@ -456,4 +456,17 @@ contract UNDOXXEDTest is Test {
     string memory proofGet = undoxxed.tokenProofPermanent(maxSupplyToken1 + 1);
     require(keccak256(bytes(proofGet)) == keccak256(bytes(proof)), "fail get the correct proof");
   }
+
+  function testPermanentURI() public {
+    string memory mediaURI = "MY URI";
+    undoxxed.setStatus(Status.publicMint);
+    undoxxed.setBaseMediaURICover1(mediaURI);
+    vm.deal(user1, 10 ether);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    undoxxed.mint{value: publicPrice * 1}(user1, 1, 0);
+    require(undoxxed.balanceOf(user1) == 1, "fail mint public");
+    string[] memory getMediaURI = undoxxed.tokenURIsPermanent(1);
+    require(keccak256(bytes(getMediaURI[0])) == keccak256(bytes(mediaURI)), "fail get media URI");
+  }
 }
