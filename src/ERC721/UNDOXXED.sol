@@ -20,8 +20,8 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
   using Strings for uint256;
 
   string private baseURI = "YOUR BASE URI/";  
-  string private baseMediaURICover1 = "YOUR BASE URI/";
-  string private baseMediaURICover2 = "YOUR BASE URI/";
+  string private baseMediaURICover1 = "YOUR BASE URI MEDIA 1/";
+  string private baseMediaURICover2 = "YOUR BASE URI MEDIA 1/";
   string private tokenProof1;
   string private tokenProof2;
   string private sufixURI = ".json";

@@ -443,4 +443,17 @@ contract UNDOXXEDTest is Test {
     string memory proofGet = undoxxed.tokenProofPermanent(1);
     require(keccak256(bytes(proofGet)) == keccak256(bytes(proof)), "fail get the correct proof");
   }
+
+  function testPermanentProofCover2() public {
+    string memory proof = "MY PROOF";
+    undoxxed.setStatus(Status.publicMint);
+    undoxxed.setTokenProof2(proof);
+    vm.deal(user1, 10 ether);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    undoxxed.mint{value: publicPrice * 1}(user1, 0, 1);
+    require(undoxxed.balanceOf(user1) == 1, "fail mint public");
+    string memory proofGet = undoxxed.tokenProofPermanent(maxSupplyToken1 + 1);
+    require(keccak256(bytes(proofGet)) == keccak256(bytes(proof)), "fail get the correct proof");
+  }
 }
