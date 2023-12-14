@@ -7,7 +7,8 @@ enum Status {
   whitelist,
   publicMint,
   finished,
-  paused
+  paused,
+  privateWhitelist
 }
 
 error contractFreezed();

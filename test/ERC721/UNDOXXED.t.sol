@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "forge-std/Test.sol";
+import "lib/forge-std/src/Test.sol";
 
 import "../../src/ERC721/UNDOXXED.sol";
 import "../../src/ERC721/verification/Verification.sol";
@@ -20,9 +20,12 @@ contract UNDOXXEDTest is Test {
   uint256 internal signerPrivateKey;
   address internal signer;
 
-  uint256 internal maxSupply = 200;
-  uint256 internal maxSupplyToken1 = 100;
-  uint256 internal maxSupplyToken2 = 100;
+  uint256 internal maxSupply = 300;
+  uint256 internal maxSupplyToken1 = 150;
+  uint256 internal maxSupplyToken2 = 150;
+
+  uint256 internal privateWhitelistCover1 = 10;
+  uint256 internal privateWhitelistCover2 = 10;
 
   uint256 internal whitelistPrice;
   uint256 internal publicPrice;
@@ -67,6 +70,12 @@ contract UNDOXXEDTest is Test {
     require(undoxxed.getCurrentStatus() == Status.notInitialized, "fail init status");
   }
 
+  // test deploy
+
+  function testDeployContract() public {
+    UNDOXXED undoxxedDeploy = new UNDOXXED();
+  }
+
   // test allowlist
 
   function testAllowlistMint() public {
@@ -76,6 +85,24 @@ contract UNDOXXEDTest is Test {
     vm.startPrank(user1);
     undoxxed.allowlistMint(user1, 5, 5, 5, 5, signature);
     require(undoxxed.balanceOf(user1) == 10, "fail mint in allowlist");
+  }
+
+  function testAllowlistMint1Copies() public {
+    undoxxed.setStatus(Status.allowlist);
+    bytes memory signature = sign(user1, 5, 5, Status.allowlist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    undoxxed.allowlistMint(user1, 1, 0, 5, 5, signature);
+    require(undoxxed.balanceOf(user1) == 1, "fail mint in allowlist");
+  }
+
+  function testAllowlistMint20Copies() public {
+    undoxxed.setStatus(Status.allowlist);
+    bytes memory signature = sign(user1, 10, 10, Status.allowlist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    undoxxed.allowlistMint(user1, 10, 10, 10, 10, signature);
+    require(undoxxed.balanceOf(user1) == 20, "fail mint in allowlist");
   }
 
   function testAllowlistMintFuzzAmountMint(uint256 _amount1, uint256 _amount2) public {
@@ -171,6 +198,16 @@ contract UNDOXXEDTest is Test {
   }
 
   // test whitelist
+
+  function testWhitelistMint1Copies() public {
+    undoxxed.setStatus(Status.whitelist);
+    bytes memory signature = sign(user1, 5, 5, Status.whitelist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    undoxxed.whitelistMint{value: whitelistPrice * 1}(user1, 1, 0, 5, 5, signature);
+    require(undoxxed.balanceOf(user1) == 1, "fail mint in whitelist");
+  }
 
   function testWhitelistMintShouldSuccess() public {
     undoxxed.setStatus(Status.whitelist);
@@ -458,15 +495,15 @@ contract UNDOXXEDTest is Test {
   }
 
   function testPermanentURI() public {
-    string memory mediaURI = "MY URI";
+    // string memory mediaURI = "YOUR BASE URI/";
+    string memory correctMediaURI = "YOUR BASE URI/1.json";
     undoxxed.setStatus(Status.publicMint);
-    undoxxed.setBaseMediaURICover1(mediaURI);
     vm.deal(user1, 10 ether);
     vm.stopPrank();
     vm.startPrank(user1);
     undoxxed.mint{value: publicPrice * 1}(user1, 1, 0);
     require(undoxxed.balanceOf(user1) == 1, "fail mint public");
     string[] memory getMediaURI = undoxxed.tokenURIsPermanent(1);
-    require(keccak256(bytes(getMediaURI[0])) == keccak256(bytes(mediaURI)), "fail get media URI");
+    require(keccak256(bytes(getMediaURI[0])) == keccak256(bytes(correctMediaURI)), "fail get media URI");
   }
 }
