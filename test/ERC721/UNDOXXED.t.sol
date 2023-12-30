@@ -59,7 +59,7 @@ contract UNDOXXEDTest is Test {
 
   function testGetMessageHash() public view {
     uint256 pk = vm.envUint("PRIVATE_KEY");
-    bytes32 messageHash = Verification.getMessageHash(0x0a19B1b44B6b3D97C125c2D126beD4b734C500C0, 10, 10, Status.whitelist);
+    bytes32 messageHash = Verification.getMessageHash(0x90D41fA17a8dF96E7dff80227b4FC7d208dFd026, 1, 0, Status.privateWhitelist);
     bytes32 finalHash = Verification.getEthSignedMessageHash(messageHash);
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(pk, finalHash);
     bytes memory signature = abi.encodePacked(r, s, v);

@@ -167,7 +167,7 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
     if (token1 + _amount1 > 151) revert maxSupplyToken1Reach();
     if (token2 + _amount2 > 301) revert maxSupplyToken2Reach();
     unchecked {
-      if ((_amount1 + _amount2) * publicPrice > msg.value) revert invalidAmountSend();
+      if ((_amount1 + _amount2) * whitelistPrice > msg.value) revert invalidAmountSend();
     }
 
     unchecked {
