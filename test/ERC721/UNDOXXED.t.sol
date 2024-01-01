@@ -349,6 +349,22 @@ contract UNDOXXEDTest is Test {
     undoxxed.whitelistMint{value: whitelistPrice}(user3, 1, 0, 10, 10, signature3);
   }
 
+  function testPrivateWhitelistShouldFailWhenNoSupplyAttributed() public {
+    undoxxed.setStatus(Status.whitelist);
+    bytes memory signature = sign(user1, 10, 0, Status.privateWhitelist);
+    undoxxed.setPrivatewhitelistToken1(10);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    undoxxed.privateWhitelistMint{value: whitelistPrice * 10}(user1, 10, 0, 10, 0, signature);
+    bytes memory signature2 = sign(user2, 10, 0, Status.privateWhitelist);
+    vm.stopPrank();
+    vm.startPrank(user2);
+    vm.deal(user2, 100 ether);
+    vm.expectRevert(privateWhitelistToken1SoldOut.selector);
+    undoxxed.privateWhitelistMint{value: whitelistPrice * 1}(user2, 1, 0, 10, 0, signature2);
+  }
+
   // test mint
 
   function testPublicMintShouldSuccess() public {
