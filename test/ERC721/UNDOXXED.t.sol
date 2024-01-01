@@ -296,6 +296,32 @@ contract UNDOXXEDTest is Test {
     undoxxed.privateWhitelistMint{value: whitelistPrice * 1}(user1, 1, 0, 1, 0, signature);
   }
 
+  function testPrivatewhitelistShouldSuccessWhenAllSupplyAlreadyMinted() public {
+    uint256 privateWhitelistSupply = 10;
+    /** @dev Mint all supply */
+    undoxxed.setStatus(Status.allowlist);
+    undoxxed.setMaxMintWallet(250);
+    undoxxed.setPrivatewhitelistToken1(privateWhitelistSupply);
+    undoxxed.setPrivatewhitelistToken2(privateWhitelistSupply);
+    bytes memory signature = sign(user1, 250, 250, Status.allowlist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    undoxxed.allowlistMint(user1, maxSupplyToken1 - privateWhitelistSupply, maxSupplyToken2 - privateWhitelistSupply, 250, 250, signature);
+    require(undoxxed.balanceOf(user1) == maxSupply - (privateWhitelistSupply * 2), "fail mint all supply in allowlist");
+    vm.expectRevert(maxSupplyToken1Reach.selector);
+    undoxxed.allowlistMint(user1, 1, 0, 250, 250, signature);
+    vm.expectRevert(maxSupplyToken2Reach.selector);
+    undoxxed.allowlistMint(user1, 0, 1, 250, 250, signature);
+    vm.stopPrank();
+    vm.startPrank(owner);
+    undoxxed.setStatus(Status.whitelist);
+    bytes memory signature2 = sign(user2, 1, 0, Status.privateWhitelist);
+    vm.stopPrank();
+    vm.startPrank(user2);
+    vm.deal(user2, 100 ether);
+    undoxxed.privateWhitelistMint{value: whitelistPrice * 1}(user2, 1, 0, 1, 0, signature2);
+  }
+
   // test mint
 
   function testPublicMintShouldSuccess() public {

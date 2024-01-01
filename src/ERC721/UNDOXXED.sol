@@ -169,10 +169,11 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
     }
     if (_amount1 + signatureCheckToken1[_sign] > _amount1Sign) revert exceedAllowedToken1Mint();
     if (_amount2 + signatureCheckToken2[_sign] > _amount2Sign) revert exceedAllowedToken2Mint();
-    if (token1 + _amount1 + privateWhitelistCover1 > 151) revert maxSupplyToken1Reach();
-    if (token2 + _amount2 + privateWhitelistCover2 > 301) revert maxSupplyToken2Reach();
+    // if (token1 + _amount1 + privateWhitelistCover1 > 151) revert maxSupplyToken1Reach();
+    // if (token2 + _amount2 + privateWhitelistCover2 > 301) revert maxSupplyToken2Reach();
     if (_amount1 > 0 && privateWhitelistCover1 == 0) revert privateWhitelistToken1SoldOut();
-    if (privateWhitelistCover2 == 0 && _amount2 > 0) revert privateWhitelistToken2SoldOut();
+    if (_amount2 > 0 && privateWhitelistCover2 == 0) revert privateWhitelistToken2SoldOut();
+
     unchecked {
       if ((_amount1 + _amount2) * whitelistPrice > msg.value) revert invalidAmountSend();
     }
