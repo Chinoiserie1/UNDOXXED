@@ -24,4 +24,6 @@ error exceedAllowedToken1Mint();
 error exceedAllowedToken2Mint();
 error failWhithdraw();
 error whithdrawZeroValue();
+error privateWhitelistToken1SoldOut();
+error privateWhitelistToken2SoldOut();
 

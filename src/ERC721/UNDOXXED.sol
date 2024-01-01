@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "lib/forge-std/src/Test.sol";
+
 import "lib/Assembly/src/access/Ownable.sol";
 
 import "lib/openzeppelin-contracts/contracts/token/common/ERC2981.sol";
@@ -144,6 +146,9 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
 
     _mintToken1(_to, _amount1);
     _mintToken2(_to, _amount2);
+
+    mintPerWallet[_to][1] += _amount1;
+    mintPerWallet[_to][2] += _amount2;
   }
 
   function privateWhitelistMint(
@@ -164,8 +169,10 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
     }
     if (_amount1 + signatureCheckToken1[_sign] > _amount1Sign) revert exceedAllowedToken1Mint();
     if (_amount2 + signatureCheckToken2[_sign] > _amount2Sign) revert exceedAllowedToken2Mint();
-    if (token1 + _amount1 > 151) revert maxSupplyToken1Reach();
-    if (token2 + _amount2 > 301) revert maxSupplyToken2Reach();
+    if (token1 + _amount1 + privateWhitelistCover1 > 151) revert maxSupplyToken1Reach();
+    if (token2 + _amount2 + privateWhitelistCover2 > 301) revert maxSupplyToken2Reach();
+    if (_amount1 > 0 && privateWhitelistCover1 == 0) revert privateWhitelistToken1SoldOut();
+    if (privateWhitelistCover2 == 0 && _amount2 > 0) revert privateWhitelistToken2SoldOut();
     unchecked {
       if ((_amount1 + _amount2) * whitelistPrice > msg.value) revert invalidAmountSend();
     }
@@ -180,6 +187,9 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
 
     _mintToken1(_to, _amount1);
     _mintToken2(_to, _amount2);
+
+    mintPerWallet[_to][1] += _amount1;
+    mintPerWallet[_to][2] += _amount2;
   }
 
   function mint(address _to, uint256 _amount1, uint256 _amount2)
@@ -200,6 +210,9 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
 
     _mintToken1(_to, _amount1);
     _mintToken2(_to, _amount2);
+
+    mintPerWallet[_to][1] += _amount1;
+    mintPerWallet[_to][2] += _amount2;
   }
 
   function fiatPaymentMint(
@@ -224,8 +237,8 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
     }
 
     else if (status == Status.publicMint) {
-      if (mintPerWallet[_to][1] + _amount1 > maxMintWallet) revert maxMintWalletReachToken1();
-      if (mintPerWallet[_to][2] + _amount2 > maxMintWallet) revert maxMintWalletReachToken2();
+      if (mintPerWallet[_to][1] + _amount1 + privateWhitelistCover1 > maxMintWallet) revert maxMintWalletReachToken1();
+      if (mintPerWallet[_to][2] + _amount2 + privateWhitelistCover2 > maxMintWallet) revert maxMintWalletReachToken2();
       unchecked {
         if ((_amount1 + _amount2) * publicPrice > msg.value) revert invalidAmountSend();
       }
@@ -275,6 +288,14 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
 
   function setPublicPrice(uint256 _newPublicPrice) external onlyOwner freezed {
     publicPrice = _newPublicPrice;
+  }
+
+  function setPrivatewhitelistToken1(uint256 _amountToken1) external onlyOwner freezed {
+    privateWhitelistCover1 = _amountToken1;
+  }
+
+  function setPrivatewhitelistToken2(uint256 _amountToken2) external onlyOwner freezed {
+    privateWhitelistCover2 = _amountToken2;
   }
 
   function setDefaultRoyalties(address _recipient, uint96 _feeNumerator) external onlyOwner {
