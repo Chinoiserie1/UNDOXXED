@@ -130,6 +130,22 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
     _mintToken2(_to, _amount2);
   }
 
+  /**
+   * @dev Mint function for `whitelist`
+   * 
+   * Requirements:
+   * 
+   * - `_to` should be caller or approved address
+   * - `_amount1` quantity token1 to mint
+   * - `_amount2` quantity token2 to mint
+   * - `_amount1Sign` quantity token1 user allowed to mint
+   * - `_amount2Sign` quantity token2 user allowed to mint
+   * - `_sign` the signature
+   * - `msg.value` should be equal at (`_amount1` + `_amount2`) * `whitelistPrice`
+   * 
+   * NOTE: This function can only be callable when status is `whitelist` or `publicMint`
+   * 
+   */
   function whitelistMint(
     address _to,
     uint256 _amount1,
@@ -166,6 +182,22 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
     mintPerWallet[_to][2] += _amount2;
   }
 
+  /**
+   * @dev Mint function for `privateWhitelist`
+   * 
+   * Requirements:
+   * 
+   * - `_to` should be caller or approved address
+   * - `_amount1` quantity token1 to mint
+   * - `_amount2` quantity token2 to mint
+   * - `_amount1Sign` quantity token1 user allowed to mint
+   * - `_amount2Sign` quantity token2 user allowed to mint
+   * - `_sign` the signature
+   * - `msg.value` should be equal at (`_amount1` + `_amount2`) * `whitelistPrice`
+   * 
+   * NOTE: This function can only be callable when status is `whitelist` or `publicMint`
+   * 
+   */
   function privateWhitelistMint(
     address _to,
     uint256 _amount1,
