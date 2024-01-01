@@ -238,6 +238,19 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
     mintPerWallet[_to][2] += _amount2;
   }
 
+  /**
+   * @dev Mint function for `publicMint`
+   * 
+   * Requirements:
+   * 
+   * - `_to` should be caller or approved address
+   * - `_amount1` quantity token1 to mint
+   * - `_amount2` quantity token2 to mint
+   * - `msg.value` should be equal at (`_amount1` + `_amount2`) * `publicPrice`
+   * 
+   * NOTE: This function can only be callable when status is `publicMint`
+   * 
+   */
   function mint(address _to, uint256 _amount1, uint256 _amount2)
     external
     payable
