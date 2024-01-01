@@ -16,7 +16,7 @@ import "./verification/Verification.sol";
 /**
  * @title UNDOXXED Book
  * @author chixx.eth
- * @notice ERC721 with 3 types of mint
+ * @notice ERC721 with 4 types of mint
  */
 contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ERC721PermanentProof {
   using Strings for uint256;
@@ -86,6 +86,21 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
 
   // MINT FUNCTIONS
 
+  /**
+   * @dev Mint function for `allowlist`
+   * 
+   * Requirements:
+   * 
+   * - `_to` should be caller or approved address
+   * - `_amount1` quantity token1 to mint
+   * - `_amount2` quantity token2 to mint
+   * - `_amount1Sign` quantity token1 user allowed to mint
+   * - `_amount2Sign` quantity token2 user allowed to mint
+   * - `_sign` the signature
+   * 
+   * NOTE: This function can only be callable when status is `allowlist`
+   * 
+   */
   function allowlistMint(
     address _to,
     uint256 _amount1,
@@ -169,8 +184,6 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
     }
     if (_amount1 + signatureCheckToken1[_sign] > _amount1Sign) revert exceedAllowedToken1Mint();
     if (_amount2 + signatureCheckToken2[_sign] > _amount2Sign) revert exceedAllowedToken2Mint();
-    // if (token1 + _amount1 + privateWhitelistCover1 > 151) revert maxSupplyToken1Reach();
-    // if (token2 + _amount2 + privateWhitelistCover2 > 301) revert maxSupplyToken2Reach();
     if (_amount1 > 0 && privateWhitelistCover1 == 0) revert privateWhitelistToken1SoldOut();
     if (_amount2 > 0 && privateWhitelistCover2 == 0) revert privateWhitelistToken2SoldOut();
 
