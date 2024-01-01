@@ -73,7 +73,7 @@ contract UNDOXXEDTest is Test {
   // test deploy
 
   function testDeployContract() public {
-    UNDOXXED undoxxedDeploy = new UNDOXXED();
+    new UNDOXXED();
   }
 
   // test allowlist
@@ -508,6 +508,24 @@ contract UNDOXXEDTest is Test {
     vm.prank(user1);
     vm.expectRevert();
     undoxxed.setStatus(Status.allowlist);
+  }
+
+  function testSetPrivatewhitelistToken1ShouldSuccess() public {
+    uint256 quantityPrivatewhitelist = 10;
+    undoxxed.setPrivatewhitelistToken1(quantityPrivatewhitelist);
+    vm.expectRevert();
+    undoxxed.setPrivatewhitelistToken1(1);
+    undoxxed.setStatus(Status.allowlist);
+    undoxxed.setMaxMintWallet(250);
+    bytes memory signature = sign(user1, 250, 250, Status.allowlist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    undoxxed.allowlistMint(user1, maxSupplyToken1 - quantityPrivatewhitelist - 1, maxSupplyToken2 - quantityPrivatewhitelist, 250, 250, signature);
+    vm.stopPrank();
+    vm.startPrank(owner);
+    undoxxed.setPrivatewhitelistToken1(11);
+    vm.expectRevert(noSupplyAvailableToken1.selector);
+    undoxxed.setPrivatewhitelistToken1(12);
   }
 
   // test view

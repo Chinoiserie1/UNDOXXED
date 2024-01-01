@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "lib/forge-std/src/Test.sol";
-
 import "lib/Assembly/src/access/Ownable.sol";
 
 import "lib/openzeppelin-contracts/contracts/token/common/ERC2981.sol";
@@ -50,7 +48,7 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
   mapping(bytes => uint256) private signatureCheckToken2;
 
   /**
-   * @notice check if the contract is freeze
+   * @dev check if the contract is freeze
    */
   modifier freezed {
     if (contractFreeze) revert contractFreezed();
@@ -58,7 +56,7 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
   }
 
   /**
-   * @notice check the current status
+   * @dev check the current status
    */
   modifier checkStatus(Status _status) {
     if (status != _status) revert invalidSaleStatus();
@@ -66,7 +64,7 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
   }
 
   /**
-   * @notice verify signature
+   * @dev verify signature
    */
   modifier verify(
     address _to,
@@ -350,10 +348,16 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
   }
 
   function setPrivatewhitelistToken1(uint256 _amountToken1) external onlyOwner freezed {
+    if (token1 + privateWhitelistCover1 > 150) revert noSupplyAvailableToken1();
+    if (_amountToken1 < privateWhitelistCover1)
+      revert invalidAmountCanNotBeLowerThanCurrent(privateWhitelistCover1);
     privateWhitelistCover1 = _amountToken1;
   }
 
   function setPrivatewhitelistToken2(uint256 _amountToken2) external onlyOwner freezed {
+    if (token1 + privateWhitelistCover1 > 150) revert noSupplyAvailableToken2();
+    if (_amountToken2 < privateWhitelistCover2)
+      revert invalidAmountCanNotBeLowerThanCurrent(privateWhitelistCover2);
     privateWhitelistCover2 = _amountToken2;
   }
 

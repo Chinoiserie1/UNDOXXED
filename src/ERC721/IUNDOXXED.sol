@@ -26,4 +26,7 @@ error failWhithdraw();
 error whithdrawZeroValue();
 error privateWhitelistToken1SoldOut();
 error privateWhitelistToken2SoldOut();
+error noSupplyAvailableToken1();
+error noSupplyAvailableToken2();
+error invalidAmountCanNotBeLowerThanCurrent(uint256);
 
