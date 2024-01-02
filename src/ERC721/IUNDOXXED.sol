@@ -31,4 +31,6 @@ error noSupplyAvailableToken1();
 error noSupplyAvailableToken2();
 error AmountCanNotBeLowerThanCurrent(uint256);
 error WihdrawToZeroAddress();
+error MaxSupplyCanNotBeMoreThan300();
+error MaxSupplyCanNotBeLowerThan200();
 

@@ -251,6 +251,12 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
 
   // SETTER FUNCTIONS
 
+  function setMaxSupply(uint256 _newMaxSupply) external onlyOwner {
+    if (_newMaxSupply > 300) revert MaxSupplyCanNotBeMoreThan300();
+    if (_newMaxSupply < 200) revert MaxSupplyCanNotBeLowerThan200();
+    maxSupply = _newMaxSupply;
+  }
+
   function setPublic() external onlyOwner {
     isPublic = true;
   }

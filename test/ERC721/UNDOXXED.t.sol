@@ -128,7 +128,6 @@ contract UNDOXXEDTest is Test {
   }
 
   function testAllowlistMintAllSupply() public {
-    undoxxed.setMaxMintWallet(250);
     bytes memory signature = sign(user1, 250, 250, Status.allowlist);
     vm.stopPrank();
     vm.startPrank(user1);
@@ -137,7 +136,6 @@ contract UNDOXXEDTest is Test {
   }
 
   function testAllowlistMintAllSupplyMultipleCall() public {
-    undoxxed.setMaxMintWallet(250);
     bytes memory signature = sign(user1, 250, 250, Status.allowlist);
     vm.stopPrank();
     vm.startPrank(user1);
@@ -166,7 +164,6 @@ contract UNDOXXEDTest is Test {
   }
 
   function testAllowlistMintMoreThanAllSupplyShouldFail() public {
-    undoxxed.setMaxMintWallet(300);
     bytes memory signature = sign(user1, 250, 250, Status.allowlist);
     bytes memory signature2 = sign(user2, 250, 250, Status.allowlist);
     vm.stopPrank();
@@ -273,7 +270,6 @@ contract UNDOXXEDTest is Test {
   function testPrivatewhitelistShouldSuccessWhenAllSupplyAlreadyMinted() public {
     uint256 privateWhitelistSupply = 10;
     /** @dev Mint all supply */
-    undoxxed.setMaxMintWallet(250);
     undoxxed.setPrivatewhitelistToken1(privateWhitelistSupply);
     undoxxed.setPrivatewhitelistToken2(privateWhitelistSupply);
     bytes memory signature = sign(user1, 250, 250, Status.allowlist);
@@ -297,7 +293,6 @@ contract UNDOXXEDTest is Test {
   function testPrivateWhitelistShouldSuccessAndAfterNormalWhitelistShouldSuccess() public {
     uint256 privateWhitelistSupply = 10;
     /** @dev Mint all supply */
-    undoxxed.setMaxMintWallet(250);
     undoxxed.setPrivatewhitelistToken1(privateWhitelistSupply);
     undoxxed.setPrivatewhitelistToken2(privateWhitelistSupply);
     bytes memory signature = sign(user1, 250, 250, Status.allowlist);
@@ -416,7 +411,6 @@ contract UNDOXXEDTest is Test {
     undoxxed.setPrivatewhitelistToken1(quantityPrivatewhitelist);
     vm.expectRevert();
     undoxxed.setPrivatewhitelistToken1(1);
-    undoxxed.setMaxMintWallet(250);
     bytes memory signature = sign(user1, 250, 250, Status.allowlist);
     vm.stopPrank();
     vm.startPrank(user1);
@@ -431,7 +425,7 @@ contract UNDOXXEDTest is Test {
   // test view
 
   function testTokenURIReturnInfo() public {
-    string memory expectedURI = "YOUR BASE URI/1.json";
+    string memory expectedURI = "YOUR BASE URI/1/";
     undoxxed.setPublic();
     vm.deal(user1, 10 ether);
     vm.stopPrank();
