@@ -64,6 +64,7 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
 
   constructor () ERC721("UNDOXXED", "UNDX") {
     fundsReceivers = [msg.sender, 0x19C013b64b7B2c7DaA59b96514662B687665E852];
+    _setDefaultRoyalty(msg.sender, 300);
   }
 
   // MINT FUNCTIONS
@@ -91,10 +92,11 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
     verify(msg.sender, _amount1Sign, _amount2Sign, Status.allowlist, _sign)
   {
     address receiver = msg.sender;
+    uint256 maxTokenSupply = getMaxSupplyCover();
     if (_amount1 + signatureCheckToken1[_sign] > _amount1Sign) revert exceedAllowedToken1Mint();
     if (_amount2 + signatureCheckToken2[_sign] > _amount2Sign) revert exceedAllowedToken2Mint();
-    if (token1 + _amount1 + privateWhitelistCover1 > maxSupply / 2) revert maxSupplyToken1Reach();
-    if (token2 + _amount2 + privateWhitelistCover2 > maxSupply / 2) revert maxSupplyToken2Reach();
+    if (token1 + _amount1 + privateWhitelistCover1 > maxTokenSupply) revert maxSupplyToken1Reach();
+    if (token2 + _amount2 + privateWhitelistCover2 > maxTokenSupply) revert maxSupplyToken2Reach();
 
     unchecked {
       signatureCheckToken1[_sign] += _amount1;
@@ -130,10 +132,11 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
     verify(msg.sender, _amount1Sign, _amount2Sign, Status.whitelist, _sign)
   {
     address receiver = msg.sender;
+    uint256 maxTokenSupply = getMaxSupplyCover();
     if (_amount1 + signatureCheckToken1[_sign] > _amount1Sign) revert exceedAllowedToken1Mint();
     if (_amount2 + signatureCheckToken2[_sign] > _amount2Sign) revert exceedAllowedToken2Mint();
-    if (token1 + _amount1 + privateWhitelistCover1 > maxSupply / 2) revert maxSupplyToken1Reach();
-    if (token2 + _amount2 + privateWhitelistCover2 > maxSupply / 2) revert maxSupplyToken2Reach();
+    if (token1 + _amount1 + privateWhitelistCover1 > maxTokenSupply) revert maxSupplyToken1Reach();
+    if (token2 + _amount2 + privateWhitelistCover2 > maxTokenSupply) revert maxSupplyToken2Reach();
     unchecked {
       if ((_amount1 + _amount2) * whitelistPrice > msg.value) revert invalidAmountSend();
     }
@@ -212,9 +215,10 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
     payable
   {
     address receiver = msg.sender;
+    uint256 maxTokenSupply = getMaxSupplyCover();
     if (!isPublic) revert PublicSaleNotStarted();
-    if (token1 + _amount1 + privateWhitelistCover1 > maxSupply / 2) revert maxSupplyToken1Reach();
-    if (token2 + _amount2 + privateWhitelistCover2 > maxSupply / 2) revert maxSupplyToken2Reach();
+    if (token1 + _amount1 + privateWhitelistCover1 > maxTokenSupply) revert maxSupplyToken1Reach();
+    if (token2 + _amount2 + privateWhitelistCover2 > maxTokenSupply) revert maxSupplyToken2Reach();
     unchecked {
       if ((_amount1 + _amount2) * publicPrice > msg.value) revert invalidAmountSend();
     }
@@ -254,6 +258,7 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
   function setMaxSupply(uint256 _newMaxSupply) external onlyOwner {
     if (_newMaxSupply > 300) revert MaxSupplyCanNotBeMoreThan300();
     if (_newMaxSupply < 200) revert MaxSupplyCanNotBeLowerThan200();
+    if (_newMaxSupply % 2 == 1) revert MaxSupplyCanNotbeOdd();
     maxSupply = _newMaxSupply;
   }
 
@@ -367,12 +372,12 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
     return "UNDOXXED, the finest in digital lifestyle culture, is an annual hybrid book that merges street and lifestyle culture with the digital world. It focuses on fashion, sneakers, and streetwear, cataloging the best of phygital culture. This publication bridges the physical and digital realms within the evolving Web3 space.";
   }
 
-  // function getTokenName(uint256 _tokenId) external pure returns (string memory) {
-  //   if (_tokenId < 151) {
-  //     return string(abi.encodePacked("UNDXX vol.1 Black #", _tokenId.toString(), "/300"));
-  //   }
-  //   return string(abi.encodePacked("UNDXX vol.1 Purple #", _tokenId.toString(), "/300"));
-  // }
+  function getTokenName(uint256 _tokenId) external view returns (string memory) {
+    if (keccak256(bytes(tokenProofPermanent(_tokenId))) == keccak256(bytes(tokenProof1))) {
+      return string("UNDXX vol.1 Black");
+    }
+    return string("UNDXX vol.1 Purple");
+  }
 
   // function getTokenMedia(uint256 _tokenId) external view returns (string memory) {
   //   if (_tokenId < 151) {

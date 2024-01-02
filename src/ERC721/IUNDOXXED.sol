@@ -33,4 +33,5 @@ error AmountCanNotBeLowerThanCurrent(uint256);
 error WihdrawToZeroAddress();
 error MaxSupplyCanNotBeMoreThan300();
 error MaxSupplyCanNotBeLowerThan200();
+error MaxSupplyCanNotbeOdd();
 

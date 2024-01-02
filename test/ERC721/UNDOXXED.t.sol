@@ -457,7 +457,7 @@ contract UNDOXXEDTest is Test {
     undoxxed.withdraw();
     uint256 balanceOwnerAfter = address(owner).balance;
     require(balanceOwnerBefore < balanceOwnerAfter, "fail withdraw");
-    require(balanceOwnerAfter == publicPrice * 20 * 6000 / 10000, "fail withdraw exact value");
+    require(balanceOwnerAfter == publicPrice * 20 * basicPercent / 10000, "fail withdraw exact value");
   }
 
   // test opengem
