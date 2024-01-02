@@ -176,6 +176,22 @@ contract UNDOXXEDTest is Test {
     undoxxed.allowlistMint(1, 1, 250, 250, signature2);
   }
 
+  function testAllowlistMintShouldReturnCorrectURI() public {
+    string memory cover1URI = "Black";
+    string memory cover2URI = "Purple";
+    undoxxed.setCover1BaseURI(cover1URI);
+    undoxxed.setCover2BaseURI(cover2URI);
+    bytes memory signature = sign(user1, 1, 1, Status.allowlist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    undoxxed.allowlistMint(1, 1, 1, 1, signature);
+    require(undoxxed.balanceOf(user1) == 2, "fail mint in allowlist");
+    string memory uri = undoxxed.tokenURI(1);
+    require(keccak256(bytes(cover1URI)) == keccak256(bytes(uri)), "fail get cover 1 uri");
+    uri = undoxxed.tokenURI(2);
+    require(keccak256(bytes(cover2URI)) == keccak256(bytes(uri)), "fail get cover 2 uri");
+  }
+
   // test whitelist
 
   function testWhitelistMint1Copies() public {
