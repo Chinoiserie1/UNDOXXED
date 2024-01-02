@@ -404,34 +404,58 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
 
   // VIEW FUNCTIONS
 
+  /**
+   * @dev Return the max supply of a cover.
+   */
   function getMaxSupplyCover() public view returns (uint256) {
     return maxSupply / 2;
   }
 
+  /**
+   * @dev Return total cover 1 minted.
+   */
   function getToken1Supply() external view returns (uint256) {
     return token1;
   }
 
+  /**
+   * @dev Return total cover 2 minted.
+   */
   function getToken2Supply() external view returns (uint256) {
     return token2;
   }
 
+  /**
+   * @dev Return supply minted.
+   */
   function getAllSupply() external view returns (uint256) {
     return token1 + token2;
   }
 
+  /**
+   * @dev Return the whitelist price.
+   */
   function getWhitelistPrice() external view returns (uint256) {
     return whitelistPrice;
   }
 
+  /**
+   * @dev Return the public price.
+   */
   function getPublicPrice() external view returns (uint256) {
     return publicPrice;
   }
 
+  /**
+   * @dev Return the description of the nft
+   */
   function getDescription() external pure returns (string memory) {
     return "UNDOXXED, the finest in digital lifestyle culture, is an annual hybrid book that merges street and lifestyle culture with the digital world. It focuses on fashion, sneakers, and streetwear, cataloging the best of phygital culture. This publication bridges the physical and digital realms within the evolving Web3 space.";
   }
 
+  /**
+   * @dev Returns the name a specific tokenId.
+   */
   function getTokenName(uint256 _tokenId) external view returns (string memory) {
     if (keccak256(bytes(tokenProofPermanent(_tokenId))) == keccak256(bytes(tokenProof1))) {
       return string("UNDXX vol.1 Black");
@@ -439,6 +463,9 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
     return string("UNDXX vol.1 Purple");
   }
 
+  /**
+   * @dev Return the media of a specific tokenId
+   */
   function getTokenMedia(uint256 _tokenId) external view returns (string memory) {
     if (keccak256(bytes(tokenProofPermanent(_tokenId))) == keccak256(bytes(tokenProof1))) {
       return baseMediaURICover1;
