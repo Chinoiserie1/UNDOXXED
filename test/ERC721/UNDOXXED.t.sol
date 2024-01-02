@@ -450,6 +450,7 @@ contract UNDOXXEDTest is Test {
   // test withdraw
 
   function testWithdraw() public {
+    uint256 basicPercent = 6000;
     undoxxed.setPublic();
     vm.deal(user1, 10 ether);
     vm.stopPrank();
@@ -462,7 +463,7 @@ contract UNDOXXEDTest is Test {
     undoxxed.withdraw();
     uint256 balanceOwnerAfter = address(owner).balance;
     require(balanceOwnerBefore < balanceOwnerAfter, "fail withdraw");
-    require(balanceOwnerAfter == publicPrice * 20, "fail withdraw exact value");
+    require(balanceOwnerAfter == publicPrice * 20 * 6000 / 10000, "fail withdraw exact value");
   }
 
   // test opengem

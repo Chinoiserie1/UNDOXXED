@@ -28,7 +28,6 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
   string private sufixURI = ".json";
 
   uint256 private maxSupply = 300;
-  uint256 private maxMintWallet = 10;
   uint256 private token1 = 0;
   uint256 private token2 = 0;
   uint256 private whitelistPrice = 0.001 ether;
@@ -41,7 +40,7 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
 
   address private signer = 0x90D41fA17a8dF96E7dff80227b4FC7d208dFd026;
 
-  address[] private fundsReceivers;
+  address[2] private fundsReceivers;
 
   bool public isPublic;
 
@@ -63,7 +62,9 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
     _;
   }
 
-  constructor () ERC721("UNDOXXED", "UNDX") {}
+  constructor () ERC721("UNDOXXED", "UNDX") {
+    fundsReceivers = [msg.sender, 0x19C013b64b7B2c7DaA59b96514662B687665E852];
+  }
 
   // MINT FUNCTIONS
 
@@ -77,8 +78,6 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
    * - `_amount1Sign` quantity token1 user allowed to mint
    * - `_amount2Sign` quantity token2 user allowed to mint
    * - `_sign` the signature
-   * 
-   * NOTE: This function can only be callable when status is `allowlist`
    * 
    */
   function allowlistMint(
@@ -117,8 +116,6 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
    * - `_amount2Sign` quantity token2 user allowed to mint
    * - `_sign` the signature
    * - `msg.value` should be equal at (`_amount1` + `_amount2`) * `whitelistPrice`
-   * 
-   * NOTE: This function can only be callable when status is `whitelist` or `publicMint`
    * 
    */
   function whitelistMint(
@@ -207,7 +204,7 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
    * - `_amount2` quantity token2 to mint
    * - `msg.value` should be equal at (`_amount1` + `_amount2`) * `publicPrice`
    * 
-   * NOTE: This function can only be callable when status is `publicMint`
+   * NOTE: This function can only be callable when `isPublic` equal true
    * 
    */
   function mint(uint256 _amount1, uint256 _amount2)
@@ -228,10 +225,27 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
 
   // WHITHDRAW
 
+  /**
+   * @dev Withdraw contract balance to 2 differents address
+   * 
+   * NOTE: First address will receive the `withdrawPercent`,
+   * second one will receive the remaining
+   * 
+   * Requirements:
+   * 
+   * - `fundsReceivers` should not be zero address
+   * 
+   */
   function withdraw() external onlyOwner {
-    uint256 value = address(this).balance;
-    if (value == 0) revert whithdrawZeroValue();
-    (bool success, ) = address(msg.sender).call{value: value}("");
+    address first = fundsReceivers[0];
+    address second = fundsReceivers[1];
+    if (first == address(0) || second == address(0)) revert WihdrawToZeroAddress();
+    uint256 totalValue = address(this).balance;
+    if (totalValue == 0) revert whithdrawZeroValue();
+    uint256 firstValue = totalValue * withdrawPercent / 10000;
+    (bool success, ) = address(first).call{value: firstValue}("");
+    if (!success) revert failWhithdraw();
+    (success, ) = address(second).call{value: address(this).balance}("");
     if (!success) revert failWhithdraw();
   }
 
@@ -243,10 +257,6 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
 
   function setSigner(address _newSigner) external onlyOwner {
     signer = _newSigner;
-  }
-
-  function setMaxMintWallet(uint256 _newMaxMintWallet) external onlyOwner {
-    maxMintWallet = _newMaxMintWallet;
   }
 
   function setWhitelistPrice(uint256 _newWhitelistPrice) external onlyOwner {
@@ -276,18 +286,17 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
   }
 
   /**
-   * @dev Function set 2 address for withdraw funds
+   * @dev Function set 2 address for withdraw funds.
    * 
    * NOTE:
    * 
-   * - `_firstReceiver` should be the the address that will receive the `withdrawPercent`
+   * - `_firstReceiver` should be the the address that will receive the `withdrawPercent`.
+   * - `_secondReceiver` will receive the remaining balance.
    * 
    */
   function setFundsReceivers(address _firstReceiver, address _secondReceiver) external onlyOwner {
-    address[] memory fundReceiver = new address[](2);
-    fundReceiver[0] = _firstReceiver;
-    fundReceiver[1] = _secondReceiver;
-    fundsReceivers = fundReceiver;
+    fundsReceivers[0] = _firstReceiver;
+    fundsReceivers[1] = _secondReceiver;
   }
 
   function setPercentReceiver(uint256 _percent) external onlyOwner {

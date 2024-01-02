@@ -30,4 +30,5 @@ error privateWhitelistToken2SoldOut();
 error noSupplyAvailableToken1();
 error noSupplyAvailableToken2();
 error AmountCanNotBeLowerThanCurrent(uint256);
+error WihdrawToZeroAddress();
 
