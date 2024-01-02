@@ -379,12 +379,12 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
     return string("UNDXX vol.1 Purple");
   }
 
-  // function getTokenMedia(uint256 _tokenId) external view returns (string memory) {
-  //   if (_tokenId < 151) {
-  //     return baseMediaURICover1;
-  //   }
-  //   return baseMediaURICover2;
-  // }
+  function getTokenMedia(uint256 _tokenId) external view returns (string memory) {
+    if (keccak256(bytes(tokenProofPermanent(_tokenId))) == keccak256(bytes(tokenProof1))) {
+      return baseMediaURICover1;
+    }
+    return baseMediaURICover2;
+  }
 
   // OVERRIDE FUNCTIONS
 
