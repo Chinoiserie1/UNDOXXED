@@ -19,6 +19,7 @@ error invalidAmountSend();
 error maxMintWalletReachToken1();
 error maxMintWalletReachToken2();
 error invalidSaleStatus();
+error PublicSaleNotStarted();
 error invalidSignature();
 error exceedAllowedToken1Mint();
 error exceedAllowedToken2Mint();
@@ -28,5 +29,5 @@ error privateWhitelistToken1SoldOut();
 error privateWhitelistToken2SoldOut();
 error noSupplyAvailableToken1();
 error noSupplyAvailableToken2();
-error invalidAmountCanNotBeLowerThanCurrent(uint256);
+error AmountCanNotBeLowerThanCurrent(uint256);
 

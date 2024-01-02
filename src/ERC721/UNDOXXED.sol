@@ -4,7 +4,7 @@ pragma solidity ^0.8.19;
 import "lib/Assembly/src/access/Ownable.sol";
 
 import "lib/openzeppelin-contracts/contracts/token/common/ERC2981.sol";
-import "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
 import "lib/opengem-contracts/token/ERC721/extensions/ERC721PermanentURIs.sol";
 import "lib/opengem-contracts/token/ERC721/extensions/ERC721PermanentProof.sol";
 
@@ -16,10 +16,11 @@ import "./verification/Verification.sol";
  * @author chixx.eth
  * @notice ERC721 with 4 types of mint
  */
-contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ERC721PermanentProof {
+contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721PermanentProof {
   using Strings for uint256;
 
-  string private baseURI = "YOUR BASE URI/";  
+  string private cover1URI = "YOUR BASE URI/1/";
+  string private cover2URI = "YOUR BASE URI/2/";
   string private baseMediaURICover1 = "YOUR BASE URI MEDIA 1/";
   string private baseMediaURICover2 = "YOUR BASE URI MEDIA 1/";
   string private tokenProof1;
@@ -28,40 +29,24 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
 
   uint256 private maxSupply = 300;
   uint256 private maxMintWallet = 10;
-  uint256 private token1 = 1;
-  uint256 private token2 = 151;
+  uint256 private token1 = 0;
+  uint256 private token2 = 0;
   uint256 private whitelistPrice = 0.001 ether;
   uint256 private publicPrice = 0.0015 ether;
 
   uint256 private privateWhitelistCover1 = 0;
   uint256 private privateWhitelistCover2 = 0;
 
+  uint256 private withdrawPercent = 6000;
+
   address private signer = 0x90D41fA17a8dF96E7dff80227b4FC7d208dFd026;
 
-  bool private contractFreeze;
+  address[] private fundsReceivers;
 
-  Status private status;
+  bool public isPublic;
 
-  mapping(address => bool) private fiatPayment;
-  mapping(address => mapping(uint256 => uint256)) private mintPerWallet;
   mapping(bytes => uint256) private signatureCheckToken1;
   mapping(bytes => uint256) private signatureCheckToken2;
-
-  /**
-   * @dev check if the contract is freeze
-   */
-  modifier freezed {
-    if (contractFreeze) revert contractFreezed();
-    _;
-  }
-
-  /**
-   * @dev check the current status
-   */
-  modifier checkStatus(Status _status) {
-    if (status != _status) revert invalidSaleStatus();
-    _;
-  }
 
   /**
    * @dev verify signature
@@ -78,9 +63,7 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
     _;
   }
 
-  constructor () ERC721("UNDOXXED", "UNDX") {
-    _addPermanentBaseURI(baseURI, ".json");
-  }
+  constructor () ERC721("UNDOXXED", "UNDX") {}
 
   // MINT FUNCTIONS
 
@@ -89,7 +72,6 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
    * 
    * Requirements:
    * 
-   * - `_to` should be caller or approved address
    * - `_amount1` quantity token1 to mint
    * - `_amount2` quantity token2 to mint
    * - `_amount1Sign` quantity token1 user allowed to mint
@@ -100,7 +82,6 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
    * 
    */
   function allowlistMint(
-    address _to,
     uint256 _amount1,
     uint256 _amount2,
     uint256 _amount1Sign,
@@ -108,24 +89,21 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
     bytes memory _sign
   )
     external
-    checkStatus(Status.allowlist)
-    verify(_to, _amount1Sign, _amount2Sign, Status.allowlist, _sign)
+    verify(msg.sender, _amount1Sign, _amount2Sign, Status.allowlist, _sign)
   {
-    if (msg.sender != _to) {
-      if (!fiatPayment[msg.sender]) revert onlyApprovedPaymentAddress();
-    }
+    address receiver = msg.sender;
     if (_amount1 + signatureCheckToken1[_sign] > _amount1Sign) revert exceedAllowedToken1Mint();
     if (_amount2 + signatureCheckToken2[_sign] > _amount2Sign) revert exceedAllowedToken2Mint();
-    if (token1 + _amount1 + privateWhitelistCover1 > 151) revert maxSupplyToken1Reach();
-    if (token2 + _amount2 + privateWhitelistCover2 > 301) revert maxSupplyToken2Reach();
+    if (token1 + _amount1 + privateWhitelistCover1 > maxSupply / 2) revert maxSupplyToken1Reach();
+    if (token2 + _amount2 + privateWhitelistCover2 > maxSupply / 2) revert maxSupplyToken2Reach();
 
     unchecked {
       signatureCheckToken1[_sign] += _amount1;
       signatureCheckToken2[_sign] += _amount2;
     }
 
-    _mintToken1(_to, _amount1);
-    _mintToken2(_to, _amount2);
+    _mintToken1(receiver, _amount1);
+    _mintToken2(receiver, _amount2);
   }
 
   /**
@@ -133,7 +111,6 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
    * 
    * Requirements:
    * 
-   * - `_to` should be caller or approved address
    * - `_amount1` quantity token1 to mint
    * - `_amount2` quantity token2 to mint
    * - `_amount1Sign` quantity token1 user allowed to mint
@@ -145,7 +122,6 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
    * 
    */
   function whitelistMint(
-    address _to,
     uint256 _amount1,
     uint256 _amount2,
     uint256 _amount1Sign,
@@ -154,16 +130,13 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
   )
     external
     payable
-    verify(_to, _amount1Sign, _amount2Sign, Status.whitelist, _sign)
+    verify(msg.sender, _amount1Sign, _amount2Sign, Status.whitelist, _sign)
   {
-    if (status != Status.whitelist && status != Status.publicMint) revert invalidSaleStatus();
-    if (msg.sender != _to) {
-      if (!fiatPayment[msg.sender]) revert onlyApprovedPaymentAddress();
-    }
+    address receiver = msg.sender;
     if (_amount1 + signatureCheckToken1[_sign] > _amount1Sign) revert exceedAllowedToken1Mint();
     if (_amount2 + signatureCheckToken2[_sign] > _amount2Sign) revert exceedAllowedToken2Mint();
-    if (token1 + _amount1 + privateWhitelistCover1 > 151) revert maxSupplyToken1Reach();
-    if (token2 + _amount2 + privateWhitelistCover2 > 301) revert maxSupplyToken2Reach();
+    if (token1 + _amount1 + privateWhitelistCover1 > maxSupply / 2) revert maxSupplyToken1Reach();
+    if (token2 + _amount2 + privateWhitelistCover2 > maxSupply / 2) revert maxSupplyToken2Reach();
     unchecked {
       if ((_amount1 + _amount2) * whitelistPrice > msg.value) revert invalidAmountSend();
     }
@@ -173,11 +146,8 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
       signatureCheckToken2[_sign] += _amount2;
     }
 
-    _mintToken1(_to, _amount1);
-    _mintToken2(_to, _amount2);
-
-    mintPerWallet[_to][1] += _amount1;
-    mintPerWallet[_to][2] += _amount2;
+    _mintToken1(receiver, _amount1);
+    _mintToken2(receiver, _amount2);
   }
 
   /**
@@ -185,7 +155,6 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
    * 
    * Requirements:
    * 
-   * - `_to` should be caller or approved address
    * - `_amount1` quantity token1 to mint
    * - `_amount2` quantity token2 to mint
    * - `_amount1Sign` quantity token1 user allowed to mint
@@ -197,7 +166,6 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
    * 
    */
   function privateWhitelistMint(
-    address _to,
     uint256 _amount1,
     uint256 _amount2,
     uint256 _amount1Sign,
@@ -206,12 +174,9 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
   )
     external
     payable
-    verify(_to, _amount1Sign, _amount2Sign, Status.privateWhitelist, _sign)
+    verify(msg.sender, _amount1Sign, _amount2Sign, Status.privateWhitelist, _sign)
   {
-    if (status != Status.whitelist && status != Status.publicMint) revert invalidSaleStatus();
-    if (msg.sender != _to) {
-      if (!fiatPayment[msg.sender]) revert onlyApprovedPaymentAddress();
-    }
+    address receiver = msg.sender;
     if (_amount1 + signatureCheckToken1[_sign] > _amount1Sign) revert exceedAllowedToken1Mint();
     if (_amount2 + signatureCheckToken2[_sign] > _amount2Sign) revert exceedAllowedToken2Mint();
     if (_amount1 > 0 && privateWhitelistCover1 == 0) revert privateWhitelistToken1SoldOut();
@@ -229,11 +194,8 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
     privateWhitelistCover1 -= _amount1;
     privateWhitelistCover2 -= _amount2;
 
-    _mintToken1(_to, _amount1);
-    _mintToken2(_to, _amount2);
-
-    mintPerWallet[_to][1] += _amount1;
-    mintPerWallet[_to][2] += _amount2;
+    _mintToken1(receiver, _amount1);
+    _mintToken2(receiver, _amount2);
   }
 
   /**
@@ -241,7 +203,6 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
    * 
    * Requirements:
    * 
-   * - `_to` should be caller or approved address
    * - `_amount1` quantity token1 to mint
    * - `_amount2` quantity token2 to mint
    * - `msg.value` should be equal at (`_amount1` + `_amount2`) * `publicPrice`
@@ -249,67 +210,20 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
    * NOTE: This function can only be callable when status is `publicMint`
    * 
    */
-  function mint(address _to, uint256 _amount1, uint256 _amount2)
+  function mint(uint256 _amount1, uint256 _amount2)
     external
     payable
-    checkStatus(Status.publicMint)
   {
-    if (msg.sender != _to) {
-      if (!fiatPayment[msg.sender]) revert onlyApprovedPaymentAddress();
-    }
-    if (mintPerWallet[_to][1] + _amount1 > maxMintWallet) revert maxMintWalletReachToken1();
-    if (mintPerWallet[_to][2] + _amount2 > maxMintWallet) revert maxMintWalletReachToken2();
-    if (token1 + _amount1 + privateWhitelistCover1 > 151) revert maxSupplyToken1Reach();
-    if (token2 + _amount2 + privateWhitelistCover2 > 301) revert maxSupplyToken2Reach();
+    address receiver = msg.sender;
+    if (!isPublic) revert PublicSaleNotStarted();
+    if (token1 + _amount1 + privateWhitelistCover1 > maxSupply / 2) revert maxSupplyToken1Reach();
+    if (token2 + _amount2 + privateWhitelistCover2 > maxSupply / 2) revert maxSupplyToken2Reach();
     unchecked {
       if ((_amount1 + _amount2) * publicPrice > msg.value) revert invalidAmountSend();
     }
 
-    _mintToken1(_to, _amount1);
-    _mintToken2(_to, _amount2);
-
-    mintPerWallet[_to][1] += _amount1;
-    mintPerWallet[_to][2] += _amount2;
-  }
-
-  function fiatPaymentMint(
-    address _to,
-    uint256 _amount1,
-    uint256 _amount2,
-    uint256 _amount1Sign,
-    uint256 _amount2Sign,
-    bytes memory _sign
-  ) external payable 
-  {
-    if (!fiatPayment[msg.sender]) revert onlyApprovedPaymentAddress();
-
-    if (status == Status.whitelist) {
-      if (!Verification.verifySignature(signer, _to, _amount1Sign, _amount2Sign, status, _sign))
-        revert invalidSignature();
-      if (_amount1 + signatureCheckToken1[_sign] > _amount1Sign) revert exceedAllowedToken1Mint();
-      if (_amount2 + signatureCheckToken2[_sign] > _amount2Sign) revert exceedAllowedToken2Mint();
-      unchecked {
-        if ((_amount1 + _amount2) * whitelistPrice > msg.value) revert invalidAmountSend();
-      }
-    }
-
-    else if (status == Status.publicMint) {
-      if (mintPerWallet[_to][1] + _amount1 + privateWhitelistCover1 > maxMintWallet) revert maxMintWalletReachToken1();
-      if (mintPerWallet[_to][2] + _amount2 + privateWhitelistCover2 > maxMintWallet) revert maxMintWalletReachToken2();
-      unchecked {
-        if ((_amount1 + _amount2) * publicPrice > msg.value) revert invalidAmountSend();
-      }
-    }
-
-    else {
-      revert invalidSaleStatus();
-    }
-
-    _mintToken1(_to, _amount1);
-    _mintToken2(_to, _amount2);
-
-    mintPerWallet[_to][1] += _amount1;
-    mintPerWallet[_to][2] += _amount2;
+    _mintToken1(receiver, _amount1);
+    _mintToken2(receiver, _amount2);
   }
 
   // WHITHDRAW
@@ -317,47 +231,43 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
   function withdraw() external onlyOwner {
     uint256 value = address(this).balance;
     if (value == 0) revert whithdrawZeroValue();
-    (bool success, ) = address(msg.sender).call{value: address(this).balance}("");
+    (bool success, ) = address(msg.sender).call{value: value}("");
     if (!success) revert failWhithdraw();
   }
 
   // SETTER FUNCTIONS
 
-  function setStatus(Status _newStatus) external onlyOwner freezed {
-    status = _newStatus;
+  function setPublic() external onlyOwner {
+    isPublic = true;
   }
 
-  function setSigner(address _newSigner) external onlyOwner freezed {
+  function setSigner(address _newSigner) external onlyOwner {
     signer = _newSigner;
   }
 
-  function setFiatPayment(address _newFiatPayment) external onlyOwner {
-    fiatPayment[_newFiatPayment] = true;
-  }
-
-  function setMaxMintWallet(uint256 _newMaxMintWallet) external onlyOwner freezed {
+  function setMaxMintWallet(uint256 _newMaxMintWallet) external onlyOwner {
     maxMintWallet = _newMaxMintWallet;
   }
 
-  function setWhitelistPrice(uint256 _newWhitelistPrice) external onlyOwner freezed {
+  function setWhitelistPrice(uint256 _newWhitelistPrice) external onlyOwner {
     whitelistPrice = _newWhitelistPrice;
   }
 
-  function setPublicPrice(uint256 _newPublicPrice) external onlyOwner freezed {
+  function setPublicPrice(uint256 _newPublicPrice) external onlyOwner {
     publicPrice = _newPublicPrice;
   }
 
-  function setPrivatewhitelistToken1(uint256 _amountToken1) external onlyOwner freezed {
-    if (token1 + privateWhitelistCover1 > 150) revert noSupplyAvailableToken1();
+  function setPrivatewhitelistToken1(uint256 _amountToken1) external onlyOwner {
+    if (token1 + _amountToken1 > maxSupply / 2) revert noSupplyAvailableToken1();
     if (_amountToken1 < privateWhitelistCover1)
-      revert invalidAmountCanNotBeLowerThanCurrent(privateWhitelistCover1);
+      revert AmountCanNotBeLowerThanCurrent(privateWhitelistCover1);
     privateWhitelistCover1 = _amountToken1;
   }
 
-  function setPrivatewhitelistToken2(uint256 _amountToken2) external onlyOwner freezed {
-    if (token1 + privateWhitelistCover1 > 150) revert noSupplyAvailableToken2();
+  function setPrivatewhitelistToken2(uint256 _amountToken2) external onlyOwner {
+    if (token1 + _amountToken2 > maxSupply / 2) revert noSupplyAvailableToken2();
     if (_amountToken2 < privateWhitelistCover2)
-      revert invalidAmountCanNotBeLowerThanCurrent(privateWhitelistCover2);
+      revert AmountCanNotBeLowerThanCurrent(privateWhitelistCover2);
     privateWhitelistCover2 = _amountToken2;
   }
 
@@ -365,19 +275,38 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
     _setDefaultRoyalty(_recipient, _feeNumerator);
   }
 
-  function freezeContract() external onlyOwner freezed {
-    contractFreeze = true;
+  /**
+   * @dev Function set 2 address for withdraw funds
+   * 
+   * NOTE:
+   * 
+   * - `_firstReceiver` should be the the address that will receive the `withdrawPercent`
+   * 
+   */
+  function setFundsReceivers(address _firstReceiver, address _secondReceiver) external onlyOwner {
+    address[] memory fundReceiver = new address[](2);
+    fundReceiver[0] = _firstReceiver;
+    fundReceiver[1] = _secondReceiver;
+    fundsReceivers = fundReceiver;
   }
 
-  function setBaseURI(string calldata _newBaseURI) external onlyOwner freezed {
-    baseURI = _newBaseURI;
+  function setPercentReceiver(uint256 _percent) external onlyOwner {
+    withdrawPercent = _percent;
   }
 
-  function setBaseMediaURICover1(string calldata _newBaseURI) external onlyOwner freezed {
+  function setCover1BaseURI(string calldata _newBaseURI) external onlyOwner {
+    cover1URI = _newBaseURI;
+  }
+
+  function setCover2BaseURI(string calldata _newBaseURI) external onlyOwner {
+    cover2URI = _newBaseURI;
+  }
+
+  function setBaseMediaURICover1(string calldata _newBaseURI) external onlyOwner {
     baseMediaURICover1 = _newBaseURI;
   }
 
-  function setBaseMediaURICover2(string calldata _newBaseURI) external onlyOwner freezed {
+  function setBaseMediaURICover2(string calldata _newBaseURI) external onlyOwner {
     baseMediaURICover2 = _newBaseURI;
   }
 
@@ -389,30 +318,30 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
     tokenProof2 = _tokenProof;
   }
 
-  function setSufixURI(string calldata _newSufixURI) external onlyOwner freezed {
+  function setSufixURI(string calldata _newSufixURI) external onlyOwner {
     sufixURI = _newSufixURI;
   }
 
-  function addPermanentBaseURI(string calldata prefixURI, string calldata suffixURI) external onlyOwner {
-    _addPermanentBaseURI(prefixURI, suffixURI);
+  function addPermanentTokenURI(uint256 tokenId, string calldata tokenURI) external onlyOwner {
+    _addPermanentTokenURI(tokenId, tokenURI);
   }
 
   // VIEW FUNCTIONS
 
-  function getCurrentStatus() external view returns (Status) {
-    return status;
+  function getMaxSupplyCover() public view returns (uint256) {
+    return maxSupply / 2;
   }
 
   function getToken1Supply() external view returns (uint256) {
-    return token1 - 1;
+    return token1;
   }
 
   function getToken2Supply() external view returns (uint256) {
-    return token2 - 151;
+    return token2;
   }
 
   function getAllSupply() external view returns (uint256) {
-    return token1 + token2 - 152;
+    return token1 + token2;
   }
 
   function getWhitelistPrice() external view returns (uint256) {
@@ -423,31 +352,23 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
     return publicPrice;
   }
 
-  function getBalanceOfCover1(address _address) external view returns (uint256) {
-    return mintPerWallet[_address][1];
-  }
-
-  function getBalanceOfCover2(address _address) external view returns (uint256) {
-    return mintPerWallet[_address][2];
-  }
-
   function getDescription() external pure returns (string memory) {
     return "UNDOXXED, the finest in digital lifestyle culture, is an annual hybrid book that merges street and lifestyle culture with the digital world. It focuses on fashion, sneakers, and streetwear, cataloging the best of phygital culture. This publication bridges the physical and digital realms within the evolving Web3 space.";
   }
 
-  function getTokenName(uint256 _tokenId) external pure returns (string memory) {
-    if (_tokenId < 151) {
-      return string(abi.encodePacked("UNDXX vol.1 Black #", _tokenId.toString(), "/300"));
-    }
-    return string(abi.encodePacked("UNDXX vol.1 Purple #", _tokenId.toString(), "/300"));
-  }
+  // function getTokenName(uint256 _tokenId) external pure returns (string memory) {
+  //   if (_tokenId < 151) {
+  //     return string(abi.encodePacked("UNDXX vol.1 Black #", _tokenId.toString(), "/300"));
+  //   }
+  //   return string(abi.encodePacked("UNDXX vol.1 Purple #", _tokenId.toString(), "/300"));
+  // }
 
-  function getTokenMedia(uint256 _tokenId) external view returns (string memory) {
-    if (_tokenId < 151) {
-      return baseMediaURICover1;
-    }
-    return baseMediaURICover2;
-  }
+  // function getTokenMedia(uint256 _tokenId) external view returns (string memory) {
+  //   if (_tokenId < 151) {
+  //     return baseMediaURICover1;
+  //   }
+  //   return baseMediaURICover2;
+  // }
 
   // OVERRIDE FUNCTIONS
 
@@ -455,7 +376,7 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
     public
     view
     virtual
-    override(ERC2981, ERC721, ERC721Enumerable)
+    override(ERC2981, ERC721)
     returns(bool)
   {
     return super.supportsInterface(interfaceId);
@@ -463,8 +384,9 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
 
   function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
     if (!_exists(tokenId)) return "";
+    string[] memory uris = tokenURIsPermanent(tokenId);
 
-    return string(abi.encodePacked(baseURI, tokenId.toString(), sufixURI));
+    return uris[0];
   }
 
   function _burn(uint256 tokenId) internal override(ERC721, ERC721PermanentURIs, ERC721PermanentProof) {
@@ -476,7 +398,7 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
     address to,
     uint256 firstTokenId,
     uint256 batchSize
-  ) internal virtual override(ERC721, ERC721Enumerable) {
+  ) internal virtual override(ERC721) {
     super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
   }
 
@@ -484,25 +406,25 @@ contract UNDOXXED is ERC721Enumerable, Ownable, ERC2981, ERC721PermanentURIs, ER
 
   function _mintToken1(address _to, uint256 _amount) internal {
     unchecked {
-      // if (token1 + _amount + privateWhitelistCover1 > 151) revert maxSupplyToken1Reach();
       for (uint256 i = 0; i < _amount; ++i) {
-        _mint(_to, token1);
-        _setPermanentTokenProof(token1, tokenProof1);
+        uint256 nextId = token1 + token2 + 1;
+        _mint(_to, nextId);
+        _addPermanentTokenURI(nextId, cover1URI);
+        _setPermanentTokenProof(nextId, tokenProof1);
         ++token1;
       }
-      // mintPerWallet[_to][1] += _amount;
     }
   }
 
   function _mintToken2(address _to, uint256 _amount) internal {
     unchecked {
-      // if (token2 + _amount + privateWhitelistCover2 > 301) revert maxSupplyToken2Reach();
       for (uint256 i = 0; i < _amount; ++i) {
-        _mint(_to, token2);
-        _setPermanentTokenProof(token2, tokenProof2);
+        uint256 nextId = token1 + token2 + 1;
+        _mint(_to, nextId);
+        _addPermanentTokenURI(nextId, cover2URI);
+        _setPermanentTokenProof(nextId, tokenProof2);
         ++token2;
       }
-      // mintPerWallet[_to][2] += _amount;
     }
   }
 }
