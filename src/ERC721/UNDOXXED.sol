@@ -25,7 +25,6 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
   string private baseMediaURICover2 = "YOUR BASE URI MEDIA 1/";
   string private tokenProof1;
   string private tokenProof2;
-  string private sufixURI = ".json";
 
   uint256 private maxSupply = 300;
   uint256 private token1 = 0;
@@ -36,6 +35,7 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
   uint256 private privateWhitelistCover1 = 0;
   uint256 private privateWhitelistCover2 = 0;
 
+  /** @dev 1% => 100, `withdrawPercent` / 10 000 */
   uint256 private withdrawPercent = 6000;
 
   address private signer = 0x90D41fA17a8dF96E7dff80227b4FC7d208dFd026;
@@ -245,7 +245,7 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
     uint256 firstValue = totalValue * withdrawPercent / 10000;
     (bool success, ) = address(first).call{value: firstValue}("");
     if (!success) revert failWhithdraw();
-    (success, ) = address(second).call{value: address(this).balance}("");
+    (success, ) = address(second).call{value: totalValue - firstValue}("");
     if (!success) revert failWhithdraw();
   }
 
@@ -333,12 +333,8 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
     tokenProof2 = _tokenProof;
   }
 
-  function setSufixURI(string calldata _newSufixURI) external onlyOwner {
-    sufixURI = _newSufixURI;
-  }
-
-  function addPermanentTokenURI(uint256 tokenId, string calldata tokenURI) external onlyOwner {
-    _addPermanentTokenURI(tokenId, tokenURI);
+  function addPermanentTokenURI(uint256 _tokenId, string calldata _tokenURI) external onlyOwner {
+    _addPermanentTokenURI(_tokenId, _tokenURI);
   }
 
   // VIEW FUNCTIONS
