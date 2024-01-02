@@ -255,6 +255,15 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
 
   // SETTER FUNCTIONS
 
+  /**
+   * @dev Set a new max supply.
+   * 
+   * Requirements:
+   * 
+   * - `_newMaxSupply` should be in the range of 200 to 300.
+   * - `_newMaxSupply` should be even
+   * 
+   */
   function setMaxSupply(uint256 _newMaxSupply) external onlyOwner {
     if (_newMaxSupply > 300) revert MaxSupplyCanNotBeMoreThan300();
     if (_newMaxSupply < 200) revert MaxSupplyCanNotBeLowerThan200();
@@ -262,22 +271,39 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
     maxSupply = _newMaxSupply;
   }
 
+  /**
+   * @dev Set `isPublic` to true for enable public mint.
+   */
   function setPublic() external onlyOwner {
     isPublic = true;
   }
 
+  /**
+   * @dev Set the address that sign all signatures.
+   * 
+   * NOTE: Previous signature will no longer be valid.
+   */
   function setSigner(address _newSigner) external onlyOwner {
     signer = _newSigner;
   }
 
+  /**
+   * @dev Set the whitelist price
+   */
   function setWhitelistPrice(uint256 _newWhitelistPrice) external onlyOwner {
     whitelistPrice = _newWhitelistPrice;
   }
 
+  /**
+   * @dev Set the public price
+   */
   function setPublicPrice(uint256 _newPublicPrice) external onlyOwner {
     publicPrice = _newPublicPrice;
   }
 
+  /**
+   * @dev Set the amount of token1 to be reserved.
+   */
   function setPrivatewhitelistToken1(uint256 _amountToken1) external onlyOwner {
     if (token1 + _amountToken1 > maxSupply / 2) revert noSupplyAvailableToken1();
     if (_amountToken1 < privateWhitelistCover1)
@@ -285,6 +311,9 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
     privateWhitelistCover1 = _amountToken1;
   }
 
+  /**
+   * @dev Set the amount of token2 to be reserved.
+   */
   function setPrivatewhitelistToken2(uint256 _amountToken2) external onlyOwner {
     if (token1 + _amountToken2 > maxSupply / 2) revert noSupplyAvailableToken2();
     if (_amountToken2 < privateWhitelistCover2)
@@ -292,12 +321,17 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
     privateWhitelistCover2 = _amountToken2;
   }
 
+  /**
+   * @dev Set royalties inforamtions.
+   * 
+   * NOTE: `_feeNumerator` should be `_feeNumerator` / 10000
+   */
   function setDefaultRoyalties(address _recipient, uint96 _feeNumerator) external onlyOwner {
     _setDefaultRoyalty(_recipient, _feeNumerator);
   }
 
   /**
-   * @dev Function set 2 address for withdraw funds.
+   * @dev Set 2 address for withdraw funds.
    * 
    * NOTE:
    * 
@@ -310,34 +344,60 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
     fundsReceivers[1] = _secondReceiver;
   }
 
+  /**
+   * @dev Set the percent the first address wil be funded when withdraw
+   */
   function setPercentReceiver(uint256 _percent) external onlyOwner {
     withdrawPercent = _percent;
   }
 
+  /**
+   * @dev Set base URI for cover 1.
+   */
   function setCover1BaseURI(string calldata _newBaseURI) external onlyOwner {
     cover1URI = _newBaseURI;
   }
 
+  /**
+   * @dev Set base URI for cover 2.
+   */
   function setCover2BaseURI(string calldata _newBaseURI) external onlyOwner {
     cover2URI = _newBaseURI;
   }
 
+  /**
+   * @dev Set base media URI for cover 1.
+   */
   function setBaseMediaURICover1(string calldata _newBaseURI) external onlyOwner {
     baseMediaURICover1 = _newBaseURI;
   }
 
+  /**
+   * @dev Set base media URI for cover 2.
+   */
   function setBaseMediaURICover2(string calldata _newBaseURI) external onlyOwner {
     baseMediaURICover2 = _newBaseURI;
   }
 
+  /**
+   * @dev Set proof for cover 1.
+   */
   function setTokenProof1(string calldata _tokenProof) external onlyOwner {
     tokenProof1 = _tokenProof;
   }
 
+  /**
+   * @dev Set proof for cover 2.
+   */
   function setTokenProof2(string calldata _tokenProof) external onlyOwner {
     tokenProof2 = _tokenProof;
   }
 
+  /**
+   * @dev Add a permanent token URI for a specific tokenId
+   * 
+   * NOTE: see { OpenGem Contracts (token/ERC721/extensions/ERC721PermanentURIs.sol) }
+   */
   function addPermanentTokenURI(uint256 _tokenId, string calldata _tokenURI) external onlyOwner {
     _addPermanentTokenURI(_tokenId, _tokenURI);
   }

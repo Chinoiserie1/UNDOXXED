@@ -66,10 +66,6 @@ contract UNDOXXEDTest is Test {
     console.logBytes(signature);
   }
 
-  // function testStatus() public view {
-  //   require(undoxxed.getCurrentStatus() == Status.notInitialized, "fail init status");
-  // }
-
   // test deploy
 
   function testDeployContract() public {
