@@ -437,7 +437,7 @@ contract UNDOXXEDTest is Test {
   // test view
 
   function testTokenURIReturnInfo() public {
-    string memory expectedURI = "YOUR BASE URI/1/";
+    string memory expectedURI = "ipfs://QmRKmHJfScUq7ZE8DcXjoUMvHHhQvXso7yzfGTbWEck6PA";
     undoxxed.setPublic();
     vm.deal(user1, 10 ether);
     vm.stopPrank();
@@ -472,6 +472,19 @@ contract UNDOXXEDTest is Test {
     require(balanceOwnerAfter == publicPrice * 20 * basicPercent / 10000, "fail withdraw exact value");
   }
 
+  function testWithdrawShouldFailCallerNotOwner() public {
+    undoxxed.setPublic();
+    vm.deal(user1, 10 ether);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    undoxxed.mint{value: publicPrice * 20}(10, 10);
+    require(undoxxed.balanceOf(user1) == 20, "fail mint public");
+    vm.stopPrank();
+    vm.startPrank(user2);
+    vm.expectRevert("Ownable: caller is not the owner");
+    undoxxed.withdraw();
+  }
+
   // test opengem
 
   function testPermanentProof() public {
@@ -496,20 +509,21 @@ contract UNDOXXEDTest is Test {
     vm.startPrank(user1);
     undoxxed.mint{value: publicPrice * 1}(0, 1);
     require(undoxxed.balanceOf(user1) == 1, "fail mint public");
-    string memory proofGet = undoxxed.tokenProofPermanent(maxSupplyToken1 + 1);
+    string memory proofGet = undoxxed.tokenProofPermanent(1);
     require(keccak256(bytes(proofGet)) == keccak256(bytes(proof)), "fail get the correct proof");
   }
 
   function testPermanentURI() public {
     // string memory mediaURI = "YOUR BASE URI/";
-    string memory correctMediaURI = "YOUR BASE URI/1.json";
+    string memory correctURI = "YOUR BASE URI/1.json";
     undoxxed.setPublic();
+    undoxxed.setCover1BaseURI(correctURI);
     vm.deal(user1, 10 ether);
     vm.stopPrank();
     vm.startPrank(user1);
     undoxxed.mint{value: publicPrice * 1}(1, 0);
     require(undoxxed.balanceOf(user1) == 1, "fail mint public");
     string[] memory getMediaURI = undoxxed.tokenURIsPermanent(1);
-    require(keccak256(bytes(getMediaURI[0])) == keccak256(bytes(correctMediaURI)), "fail get media URI");
+    require(keccak256(bytes(getMediaURI[getMediaURI.length - 1])) == keccak256(bytes(correctURI)), "fail get media URI");
   }
 }

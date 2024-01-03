@@ -11,6 +11,7 @@ enum Status {
   privateWhitelist
 }
 
+error ZeroAddress();
 error contractFreezed();
 error onlyApprovedPaymentAddress();
 error maxSupplyToken1Reach();
@@ -34,4 +35,5 @@ error WihdrawToZeroAddress();
 error MaxSupplyCanNotBeMoreThan300();
 error MaxSupplyCanNotBeLowerThan200();
 error MaxSupplyCanNotbeOdd();
+error MaxSupplyCanNotBeLowerThanActual();
 

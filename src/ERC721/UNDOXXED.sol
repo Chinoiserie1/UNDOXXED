@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "lib/Assembly/src/access/Ownable.sol";
-
-import "lib/openzeppelin-contracts/contracts/token/common/ERC2981.sol";
-import "lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
-import "lib/opengem-contracts/token/ERC721/extensions/ERC721PermanentURIs.sol";
-import "lib/opengem-contracts/token/ERC721/extensions/ERC721PermanentProof.sol";
+import {Ownable} from "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
+import {ERC2981} from "lib/openzeppelin-contracts/contracts/token/common/ERC2981.sol";
+import {ERC721} from "lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
+import {ERC721PermanentURIs} from "lib/opengem-contracts/token/ERC721/extensions/ERC721PermanentURIs.sol";
+import {ERC721PermanentProof} from "lib/opengem-contracts/token/ERC721/extensions/ERC721PermanentProof.sol";
 
 import "./IUNDOXXED.sol";
 import "./verification/Verification.sol";
@@ -17,12 +16,12 @@ import "./verification/Verification.sol";
  * @notice ERC721 with 4 types of mint
  */
 contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721PermanentProof {
-  using Strings for uint256;
-
-  string private cover1URI = "YOUR BASE URI/1/";
-  string private cover2URI = "YOUR BASE URI/2/";
-  string private baseMediaURICover1 = "YOUR BASE URI MEDIA 1/";
-  string private baseMediaURICover2 = "YOUR BASE URI MEDIA 1/";
+  string private cover1URI = "ipfs://QmRKmHJfScUq7ZE8DcXjoUMvHHhQvXso7yzfGTbWEck6PA";
+  string private cover2URI = "ipfs://QmY5rogmyJrbbuVZtyXKvbngxxGM7EyptJUQHSX3EJjeji";
+  string private cover1ImgURI;
+  string private cover2ImgURI;
+  string private baseMediaURICover1 = "ipfs://Qmf759TLrNFSL8gP1eU5Btx7BFGFbayh1vnCBgUGaZHNNV";
+  string private baseMediaURICover2 = "ipfs://QmXXcEtxSvJnuEUypGpruMxgQo1DNwPAJX5CoBFsqTHRxc";
   string private tokenProof1;
   string private tokenProof2;
 
@@ -237,7 +236,7 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
    * 
    * Requirements:
    * 
-   * - `fundsReceivers` should not be zero address
+   * - `fundsReceivers` each address should not be zero address
    * 
    */
   function withdraw() external onlyOwner {
@@ -268,6 +267,7 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
     if (_newMaxSupply > 300) revert MaxSupplyCanNotBeMoreThan300();
     if (_newMaxSupply < 200) revert MaxSupplyCanNotBeLowerThan200();
     if (_newMaxSupply % 2 == 1) revert MaxSupplyCanNotbeOdd();
+    if (_newMaxSupply > maxSupply) revert MaxSupplyCanNotBeLowerThanActual();
     maxSupply = _newMaxSupply;
   }
 
@@ -340,6 +340,7 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
    * 
    */
   function setFundsReceivers(address _firstReceiver, address _secondReceiver) external onlyOwner {
+    if (_firstReceiver == address(0) || _secondReceiver == address(0)) revert ZeroAddress();
     fundsReceivers[0] = _firstReceiver;
     fundsReceivers[1] = _secondReceiver;
   }
@@ -444,6 +445,14 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
    */
   function getPublicPrice() external view returns (uint256) {
     return publicPrice;
+  }
+
+  /**
+   * @dev Return the amount mint for each cover by a specific signature.
+   */
+  function getBalanceMintBySign(bytes memory _sign) external view returns (uint256 cover1, uint256 cover2) {
+    cover1 = signatureCheckToken1[_sign];
+    cover2 = signatureCheckToken2[_sign];
   }
 
   /**
