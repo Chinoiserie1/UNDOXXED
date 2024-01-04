@@ -272,7 +272,7 @@ contract UNDOXXEDTest is Test {
 
   function testPrivateWhitelistShouldsuccess() public {
     bytes memory signature = sign(user1, 1, 0, Status.privateWhitelist);
-    undoxxed.setPrivatewhitelistToken1(10);
+    undoxxed.setReserveToken1(10);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.deal(user1, 100 ether);
@@ -282,8 +282,8 @@ contract UNDOXXEDTest is Test {
   function testPrivatewhitelistShouldSuccessWhenAllSupplyAlreadyMinted() public {
     uint256 privateWhitelistSupply = 10;
     /** @dev Mint all supply */
-    undoxxed.setPrivatewhitelistToken1(privateWhitelistSupply);
-    undoxxed.setPrivatewhitelistToken2(privateWhitelistSupply);
+    undoxxed.setReserveToken1(privateWhitelistSupply);
+    undoxxed.setReserveToken2(privateWhitelistSupply);
     bytes memory signature = sign(user1, 250, 250, Status.allowlist);
     vm.stopPrank();
     vm.startPrank(user1);
@@ -305,8 +305,8 @@ contract UNDOXXEDTest is Test {
   function testPrivateWhitelistShouldSuccessAndAfterNormalWhitelistShouldSuccess() public {
     uint256 privateWhitelistSupply = 10;
     /** @dev Mint all supply */
-    undoxxed.setPrivatewhitelistToken1(privateWhitelistSupply);
-    undoxxed.setPrivatewhitelistToken2(privateWhitelistSupply);
+    undoxxed.setReserveToken1(privateWhitelistSupply);
+    undoxxed.setReserveToken2(privateWhitelistSupply);
     bytes memory signature = sign(user1, 250, 250, Status.allowlist);
     vm.stopPrank();
     vm.startPrank(user1);
@@ -328,7 +328,7 @@ contract UNDOXXEDTest is Test {
 
   function testPrivateWhitelistShouldFailWhenNoSupplyAttributed() public {
     bytes memory signature = sign(user1, 10, 0, Status.privateWhitelist);
-    undoxxed.setPrivatewhitelistToken1(10);
+    undoxxed.setReserveToken1(10);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.deal(user1, 100 ether);
@@ -420,18 +420,18 @@ contract UNDOXXEDTest is Test {
 
   function testSetPrivatewhitelistToken1ShouldSuccess() public {
     uint256 quantityPrivatewhitelist = 10;
-    undoxxed.setPrivatewhitelistToken1(quantityPrivatewhitelist);
+    undoxxed.setReserveToken1(quantityPrivatewhitelist);
     vm.expectRevert();
-    undoxxed.setPrivatewhitelistToken1(1);
+    undoxxed.setReserveToken1(1);
     bytes memory signature = sign(user1, 250, 250, Status.allowlist);
     vm.stopPrank();
     vm.startPrank(user1);
     undoxxed.allowlistMint(maxSupplyToken1 - quantityPrivatewhitelist - 1, maxSupplyToken2 - quantityPrivatewhitelist, 250, 250, signature);
     vm.stopPrank();
     vm.startPrank(owner);
-    undoxxed.setPrivatewhitelistToken1(11);
+    undoxxed.setReserveToken1(11);
     vm.expectRevert(noSupplyAvailableToken1.selector);
-    undoxxed.setPrivatewhitelistToken1(12);
+    undoxxed.setReserveToken1(12);
   }
 
   // test view
@@ -514,7 +514,6 @@ contract UNDOXXEDTest is Test {
   }
 
   function testPermanentURI() public {
-    // string memory mediaURI = "YOUR BASE URI/";
     string memory correctURI = "YOUR BASE URI/1.json";
     undoxxed.setPublic();
     undoxxed.setCover1BaseURI(correctURI);

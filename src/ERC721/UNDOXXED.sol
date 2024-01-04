@@ -18,21 +18,20 @@ import "./verification/Verification.sol";
 contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721PermanentProof {
   string private cover1URI = "ipfs://QmRKmHJfScUq7ZE8DcXjoUMvHHhQvXso7yzfGTbWEck6PA";
   string private cover2URI = "ipfs://QmY5rogmyJrbbuVZtyXKvbngxxGM7EyptJUQHSX3EJjeji";
-  string private cover1ImgURI;
-  string private cover2ImgURI;
   string private baseMediaURICover1 = "ipfs://Qmf759TLrNFSL8gP1eU5Btx7BFGFbayh1vnCBgUGaZHNNV";
   string private baseMediaURICover2 = "ipfs://QmXXcEtxSvJnuEUypGpruMxgQo1DNwPAJX5CoBFsqTHRxc";
-  string private tokenProof1;
-  string private tokenProof2;
+  string private tokenProof1 = "proof cover1";
+  string private tokenProof2 = "proof cover2";
 
-  uint256 private maxSupply = 300;
+  uint256 private maxSupply = 200;
   uint256 private token1 = 0;
   uint256 private token2 = 0;
   uint256 private whitelistPrice = 0.001 ether;
   uint256 private publicPrice = 0.0015 ether;
 
-  uint256 private privateWhitelistCover1 = 0;
-  uint256 private privateWhitelistCover2 = 0;
+  uint256 private cover1Reserved = 0;
+  uint256 private cover2Reserved = 0;
+
 
   /** @dev 1% => 100, `withdrawPercent` / 10 000 */
   uint256 private withdrawPercent = 6000;
@@ -94,13 +93,18 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
     uint256 maxTokenSupply = getMaxSupplyCover();
     if (_amount1 + signatureCheckToken1[_sign] > _amount1Sign) revert exceedAllowedToken1Mint();
     if (_amount2 + signatureCheckToken2[_sign] > _amount2Sign) revert exceedAllowedToken2Mint();
-    if (token1 + _amount1 + privateWhitelistCover1 > maxTokenSupply) revert maxSupplyToken1Reach();
-    if (token2 + _amount2 + privateWhitelistCover2 > maxTokenSupply) revert maxSupplyToken2Reach();
+    if (token1 + _amount1 + cover1Reserved > maxTokenSupply) revert maxSupplyToken1Reach();
+    if (token2 + _amount2 + cover2Reserved > maxTokenSupply) revert maxSupplyToken2Reach();
+    if (_amount1 > 0 && cover1Reserved == 0) revert NoReserveToken1();
+    if (_amount2 > 0 && cover2Reserved == 0) revert NoReserveToken2();
 
     unchecked {
       signatureCheckToken1[_sign] += _amount1;
       signatureCheckToken2[_sign] += _amount2;
     }
+
+    cover1Reserved -= _amount1;
+    cover2Reserved -= _amount2;
 
     _mintToken1(receiver, _amount1);
     _mintToken2(receiver, _amount2);
@@ -134,8 +138,8 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
     uint256 maxTokenSupply = getMaxSupplyCover();
     if (_amount1 + signatureCheckToken1[_sign] > _amount1Sign) revert exceedAllowedToken1Mint();
     if (_amount2 + signatureCheckToken2[_sign] > _amount2Sign) revert exceedAllowedToken2Mint();
-    if (token1 + _amount1 + privateWhitelistCover1 > maxTokenSupply) revert maxSupplyToken1Reach();
-    if (token2 + _amount2 + privateWhitelistCover2 > maxTokenSupply) revert maxSupplyToken2Reach();
+    if (token1 + _amount1 + cover1Reserved > maxTokenSupply) revert maxSupplyToken1Reach();
+    if (token2 + _amount2 + cover2Reserved > maxTokenSupply) revert maxSupplyToken2Reach();
     unchecked {
       if ((_amount1 + _amount2) * whitelistPrice > msg.value) revert invalidAmountSend();
     }
@@ -178,8 +182,8 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
     address receiver = msg.sender;
     if (_amount1 + signatureCheckToken1[_sign] > _amount1Sign) revert exceedAllowedToken1Mint();
     if (_amount2 + signatureCheckToken2[_sign] > _amount2Sign) revert exceedAllowedToken2Mint();
-    if (_amount1 > 0 && privateWhitelistCover1 == 0) revert privateWhitelistToken1SoldOut();
-    if (_amount2 > 0 && privateWhitelistCover2 == 0) revert privateWhitelistToken2SoldOut();
+    if (_amount1 > 0 && cover1Reserved == 0) revert privateWhitelistToken1SoldOut();
+    if (_amount2 > 0 && cover2Reserved == 0) revert privateWhitelistToken2SoldOut();
 
     unchecked {
       if ((_amount1 + _amount2) * whitelistPrice > msg.value) revert invalidAmountSend();
@@ -190,8 +194,8 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
       signatureCheckToken2[_sign] += _amount2;
     }
 
-    privateWhitelistCover1 -= _amount1;
-    privateWhitelistCover2 -= _amount2;
+    cover1Reserved -= _amount1;
+    cover2Reserved -= _amount2;
 
     _mintToken1(receiver, _amount1);
     _mintToken2(receiver, _amount2);
@@ -216,8 +220,8 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
     address receiver = msg.sender;
     uint256 maxTokenSupply = getMaxSupplyCover();
     if (!isPublic) revert PublicSaleNotStarted();
-    if (token1 + _amount1 + privateWhitelistCover1 > maxTokenSupply) revert maxSupplyToken1Reach();
-    if (token2 + _amount2 + privateWhitelistCover2 > maxTokenSupply) revert maxSupplyToken2Reach();
+    if (token1 + _amount1 + cover1Reserved > maxTokenSupply) revert maxSupplyToken1Reach();
+    if (token2 + _amount2 + cover2Reserved > maxTokenSupply) revert maxSupplyToken2Reach();
     unchecked {
       if ((_amount1 + _amount2) * publicPrice > msg.value) revert invalidAmountSend();
     }
@@ -304,21 +308,21 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
   /**
    * @dev Set the amount of token1 to be reserved.
    */
-  function setPrivatewhitelistToken1(uint256 _amountToken1) external onlyOwner {
+  function setReserveToken1(uint256 _amountToken1) external onlyOwner {
     if (token1 + _amountToken1 > maxSupply / 2) revert noSupplyAvailableToken1();
-    if (_amountToken1 < privateWhitelistCover1)
-      revert AmountCanNotBeLowerThanCurrent(privateWhitelistCover1);
-    privateWhitelistCover1 = _amountToken1;
+    if (_amountToken1 < cover1Reserved)
+      revert AmountCanNotBeLowerThanCurrent(cover1Reserved);
+    cover1Reserved = _amountToken1;
   }
 
   /**
    * @dev Set the amount of token2 to be reserved.
    */
-  function setPrivatewhitelistToken2(uint256 _amountToken2) external onlyOwner {
+  function setReserveToken2(uint256 _amountToken2) external onlyOwner {
     if (token1 + _amountToken2 > maxSupply / 2) revert noSupplyAvailableToken2();
-    if (_amountToken2 < privateWhitelistCover2)
-      revert AmountCanNotBeLowerThanCurrent(privateWhitelistCover2);
-    privateWhitelistCover2 = _amountToken2;
+    if (_amountToken2 < cover2Reserved)
+      revert AmountCanNotBeLowerThanCurrent(cover2Reserved);
+    cover2Reserved = _amountToken2;
   }
 
   /**
