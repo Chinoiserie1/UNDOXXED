@@ -373,8 +373,21 @@ contract UNDOXXEDTest is Test {
     vm.stopPrank();
     vm.startPrank(user2);
     vm.deal(user2, 100 ether);
-    vm.expectRevert(privateWhitelistToken1SoldOut.selector);
+    vm.expectRevert(NoReserveToken1.selector);
     undoxxed.privateWhitelistMint{value: whitelistPrice * 1}(1, 0, 10, 0, signature2);
+  }
+
+  function testPrivateWhitelistShouldFailMintMoreThanReserve() public {
+    bytes memory signature = sign(user1, 20, 20, Status.privateWhitelist);
+    undoxxed.setReserveToken1(10);
+    undoxxed.setReserveToken2(10);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    vm.expectRevert(NoReserveToken1.selector);
+    undoxxed.privateWhitelistMint{value: whitelistPrice * 11}(11, 0, 20, 20, signature);
+    vm.expectRevert(NoReserveToken2.selector);
+    undoxxed.privateWhitelistMint{value: whitelistPrice * 11}(0, 11, 20, 20, signature);
   }
 
   // test mint
