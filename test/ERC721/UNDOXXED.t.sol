@@ -505,6 +505,11 @@ contract UNDOXXEDTest is Test {
     require(keccak256(bytes(expectedURI)) == keccak256(bytes(tokenURI)), "fail get correct URI");
   }
 
+  function testMaxSupplyCoverShoulReturnCorrectInfo() public {
+    uint256 maxSupplyByCover = undoxxed.getMaxSupplyCover();
+    require(maxSupplyByCover == maxSupplyToken1, "fail get correct supply by cover");
+  }
+
   // test withdraw
 
   function testWithdraw() public {
