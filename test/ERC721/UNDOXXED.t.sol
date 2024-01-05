@@ -210,6 +210,18 @@ contract UNDOXXEDTest is Test {
     require(keccak256(bytes(cover2URI)) == keccak256(bytes(uri)), "fail get cover 2 uri");
   }
 
+  function testAllowlistMintShouldFailMintMoreThanReserve() public {
+    undoxxed.setReserveToken1(10);
+    undoxxed.setReserveToken2(10);
+    bytes memory signature = sign(user1, 20, 20, Status.allowlist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.expectRevert(NoReserveToken1.selector);
+    undoxxed.allowlistMint(11, 0, 20, 20, signature);
+    vm.expectRevert(NoReserveToken2.selector);
+    undoxxed.allowlistMint(0, 11, 20, 20, signature);
+  }
+
   // test whitelist
 
   function testWhitelistMint1Copies() public {
