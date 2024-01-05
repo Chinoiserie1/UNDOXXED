@@ -505,9 +505,22 @@ contract UNDOXXEDTest is Test {
     require(keccak256(bytes(expectedURI)) == keccak256(bytes(tokenURI)), "fail get correct URI");
   }
 
-  function testMaxSupplyCoverShoulReturnCorrectInfo() public {
+  function testMaxSupplyCoverShoulReturnCorrectInfo() public view {
     uint256 maxSupplyByCover = undoxxed.getMaxSupplyCover();
     require(maxSupplyByCover == maxSupplyToken1, "fail get correct supply by cover");
+  }
+
+  function testGetTokenSupplyShoulReturnCorrectInfo() public {
+    undoxxed.setPublic();
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    undoxxed.mint{value: publicPrice * 18}(8, 10);
+    require(undoxxed.balanceOf(user1) == 18, "fail mint in public");
+    uint256 supplyToken1 = undoxxed.getToken1Supply();
+    require(supplyToken1 == 8, "fail get supplyToken1");
+    uint256 supplyToken2 = undoxxed.getToken2Supply();
+    require(supplyToken2 == 10, "fail get supplyToken1");
   }
 
   // test withdraw
