@@ -77,6 +77,7 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
    * - `_amount1Sign` quantity token1 user allowed to mint
    * - `_amount2Sign` quantity token2 user allowed to mint
    * - `_sign` the signature
+   * - reserve should be set
    * 
    */
   function allowlistMint(
@@ -93,8 +94,8 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
     uint256 maxTokenSupply = getMaxSupplyCover();
     if (_amount1 + signatureCheckToken1[_sign] > _amount1Sign) revert exceedAllowedToken1Mint();
     if (_amount2 + signatureCheckToken2[_sign] > _amount2Sign) revert exceedAllowedToken2Mint();
-    if (token1 + _amount1 + cover1Reserved > maxTokenSupply) revert maxSupplyToken1Reach();
-    if (token2 + _amount2 + cover2Reserved > maxTokenSupply) revert maxSupplyToken2Reach();
+    if (token1 + _amount1 > maxTokenSupply) revert maxSupplyToken1Reach();
+    if (token2 + _amount2 > maxTokenSupply) revert maxSupplyToken2Reach();
     if (_amount1 > 0 && cover1Reserved == 0) revert NoReserveToken1();
     if (_amount2 > 0 && cover2Reserved == 0) revert NoReserveToken2();
 
