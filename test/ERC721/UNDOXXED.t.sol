@@ -544,6 +544,18 @@ contract UNDOXXEDTest is Test {
     require(allSupply == 18, "fail get correct all supply");
   }
 
+  function testGetBalanceMintBySignShoulReturnCorrectInfo() public {
+    bytes memory signature = sign(user1, 5, 5, Status.whitelist);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    undoxxed.whitelistMint{value: whitelistPrice * 8}(3, 5, 5, 5, signature);
+    require(undoxxed.balanceOf(user1) == 8, "fail mint in whitelist");
+    (uint256 mintToken1, uint256 mintToken2) = undoxxed.getBalanceMintBySign(signature);
+    require(mintToken1 == 3, "fail get amount mint token 1");
+    require(mintToken2 == 5, "fail get amount mint token 2");
+  }
+
   // test withdraw
 
   function testWithdraw() public {
