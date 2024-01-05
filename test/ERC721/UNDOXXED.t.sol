@@ -390,6 +390,16 @@ contract UNDOXXEDTest is Test {
     undoxxed.privateWhitelistMint{value: whitelistPrice * 11}(0, 11, 20, 20, signature);
   }
 
+  function testPrivateWhitelistShouldFailInvalidAmountSend() public {
+    bytes memory signature = sign(user1, 2, 0, Status.privateWhitelist);
+    undoxxed.setReserveToken1(10);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    vm.expectRevert(invalidAmountSend.selector);
+    undoxxed.privateWhitelistMint{value: whitelistPrice * 1}(2, 0, 2, 0, signature);
+  }
+
   // test mint
 
   function testPublicMintShouldSuccess() public {
