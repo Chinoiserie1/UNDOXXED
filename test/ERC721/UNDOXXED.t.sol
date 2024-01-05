@@ -533,6 +533,17 @@ contract UNDOXXEDTest is Test {
     require(supplyToken2 == 10, "fail get supplyToken1");
   }
 
+  function testGetAllSupplyShoulReturnCorrectInfo() public {
+    undoxxed.setPublic();
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    undoxxed.mint{value: publicPrice * 18}(8, 10);
+    require(undoxxed.balanceOf(user1) == 18, "fail mint in public");
+    uint256 allSupply = undoxxed.getAllSupply();
+    require(allSupply == 18, "fail get correct all supply");
+  }
+
   // test withdraw
 
   function testWithdraw() public {
