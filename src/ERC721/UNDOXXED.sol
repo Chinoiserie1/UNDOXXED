@@ -15,7 +15,7 @@ import "./verification/Verification.sol";
  * @author chixx.eth
  * @notice ERC721 with 4 types of mint
  */
-contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721PermanentProof {
+contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentProof {
   string private cover1URI = "ipfs://QmRKmHJfScUq7ZE8DcXjoUMvHHhQvXso7yzfGTbWEck6PA";
   string private cover2URI = "ipfs://QmY5rogmyJrbbuVZtyXKvbngxxGM7EyptJUQHSX3EJjeji";
   string private baseMediaURICover1 = "ipfs://Qmf759TLrNFSL8gP1eU5Btx7BFGFbayh1vnCBgUGaZHNNV";
@@ -245,15 +245,13 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
    * 
    */
   function withdraw() external onlyOwner {
-    address first = fundsReceivers[0];
-    address second = fundsReceivers[1];
-    if (first == address(0) || second == address(0)) revert WihdrawToZeroAddress();
+    if (fundsReceivers[0] == address(0) || fundsReceivers[1] == address(0)) revert WihdrawToZeroAddress();
     uint256 totalValue = address(this).balance;
     if (totalValue == 0) revert whithdrawZeroValue();
     uint256 firstValue = totalValue * withdrawPercent / 10000;
-    (bool success, ) = address(first).call{value: firstValue}("");
+    (bool success, ) = address(fundsReceivers[0]).call{value: firstValue}("");
     if (!success) revert failWhithdraw();
-    (success, ) = address(second).call{value: totalValue - firstValue}("");
+    (success, ) = address(fundsReceivers[1]).call{value: totalValue - firstValue}("");
     if (!success) revert failWhithdraw();
   }
 
@@ -358,55 +356,13 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
   }
 
   /**
-   * @dev Set base URI for cover 1.
-   */
-  function setCover1BaseURI(string calldata _newBaseURI) external onlyOwner {
-    cover1URI = _newBaseURI;
-  }
-
-  /**
-   * @dev Set base URI for cover 2.
-   */
-  function setCover2BaseURI(string calldata _newBaseURI) external onlyOwner {
-    cover2URI = _newBaseURI;
-  }
-
-  /**
-   * @dev Set base media URI for cover 1.
-   */
-  function setBaseMediaURICover1(string calldata _newBaseURI) external onlyOwner {
-    baseMediaURICover1 = _newBaseURI;
-  }
-
-  /**
-   * @dev Set base media URI for cover 2.
-   */
-  function setBaseMediaURICover2(string calldata _newBaseURI) external onlyOwner {
-    baseMediaURICover2 = _newBaseURI;
-  }
-
-  /**
-   * @dev Set proof for cover 1.
-   */
-  function setTokenProof1(string calldata _tokenProof) external onlyOwner {
-    tokenProof1 = _tokenProof;
-  }
-
-  /**
-   * @dev Set proof for cover 2.
-   */
-  function setTokenProof2(string calldata _tokenProof) external onlyOwner {
-    tokenProof2 = _tokenProof;
-  }
-
-  /**
    * @dev Add a permanent token URI for a specific tokenId
    * 
    * NOTE: see { OpenGem Contracts (token/ERC721/extensions/ERC721PermanentURIs.sol) }
    */
-  function addPermanentTokenURI(uint256 _tokenId, string calldata _tokenURI) external onlyOwner {
-    _addPermanentTokenURI(_tokenId, _tokenURI);
-  }
+  // function addPermanentTokenURI(uint256 _tokenId, string calldata _tokenURI) external onlyOwner {
+  //   _addPermanentTokenURI(_tokenId, _tokenURI);
+  // }
 
   // VIEW FUNCTIONS
 
@@ -501,22 +457,14 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
 
   function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
     if (!_exists(tokenId)) return "";
-    string[] memory uris = tokenURIsPermanent(tokenId);
-
-    return uris[0];
+    if (keccak256(bytes(tokenProofPermanent(tokenId))) == keccak256(bytes(tokenProof1))) {
+      return cover1URI;
+    }
+    return cover2URI;
   }
 
-  function _burn(uint256 tokenId) internal override(ERC721, ERC721PermanentURIs, ERC721PermanentProof) {
+  function _burn(uint256 tokenId) internal override(ERC721, ERC721PermanentProof) {
     super._burn(tokenId);
-  }
-
-  function _beforeTokenTransfer(
-    address from,
-    address to,
-    uint256 firstTokenId,
-    uint256 batchSize
-  ) internal virtual override(ERC721) {
-    super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
   }
 
   // INTERNAL FUNCTIONS
@@ -526,7 +474,6 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
       for (uint256 i = 0; i < _amount; ++i) {
         uint256 nextId = token1 + token2 + 1;
         _mint(_to, nextId);
-        _addPermanentTokenURI(nextId, cover1URI);
         _setPermanentTokenProof(nextId, tokenProof1);
         ++token1;
       }
@@ -538,7 +485,6 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentURIs, ERC721Perman
       for (uint256 i = 0; i < _amount; ++i) {
         uint256 nextId = token1 + token2 + 1;
         _mint(_to, nextId);
-        _addPermanentTokenURI(nextId, cover2URI);
         _setPermanentTokenProof(nextId, tokenProof2);
         ++token2;
       }

@@ -59,7 +59,7 @@ contract UNDOXXEDTest is Test {
 
   function testGetMessageHash() public view {
     uint256 pk = vm.envUint("PRIVATE_KEY");
-    bytes32 messageHash = Verification.getMessageHash(0x334e2d1423BA76a3C08f2CE34b88191Bc3CD4dcA, 0, 3, Status.allowlist);
+    bytes32 messageHash = Verification.getMessageHash(0x26C0320F270b3DdB224b8F7f96C10818d46bFe5C, 0, 2, Status.privateWhitelist);
     bytes32 finalHash = Verification.getEthSignedMessageHash(messageHash);
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(pk, finalHash);
     bytes memory signature = abi.encodePacked(r, s, v);
@@ -192,23 +192,23 @@ contract UNDOXXEDTest is Test {
     undoxxed.allowlistMint(1, 1, 250, 250, signature2);
   }
 
-  function testAllowlistMintShouldReturnCorrectURI() public {
-    undoxxed.setReserveToken1(10);
-    undoxxed.setReserveToken2(10);
-    string memory cover1URI = "Black";
-    string memory cover2URI = "Purple";
-    undoxxed.setCover1BaseURI(cover1URI);
-    undoxxed.setCover2BaseURI(cover2URI);
-    bytes memory signature = sign(user1, 1, 1, Status.allowlist);
-    vm.stopPrank();
-    vm.startPrank(user1);
-    undoxxed.allowlistMint(1, 1, 1, 1, signature);
-    require(undoxxed.balanceOf(user1) == 2, "fail mint in allowlist");
-    string memory uri = undoxxed.tokenURI(1);
-    require(keccak256(bytes(cover1URI)) == keccak256(bytes(uri)), "fail get cover 1 uri");
-    uri = undoxxed.tokenURI(2);
-    require(keccak256(bytes(cover2URI)) == keccak256(bytes(uri)), "fail get cover 2 uri");
-  }
+  // function testAllowlistMintShouldReturnCorrectURI() public {
+  //   undoxxed.setReserveToken1(10);
+  //   undoxxed.setReserveToken2(10);
+  //   string memory cover1URI = "Black";
+  //   string memory cover2URI = "Purple";
+  //   undoxxed.setCover1BaseURI(cover1URI);
+  //   undoxxed.setCover2BaseURI(cover2URI);
+  //   bytes memory signature = sign(user1, 1, 1, Status.allowlist);
+  //   vm.stopPrank();
+  //   vm.startPrank(user1);
+  //   undoxxed.allowlistMint(1, 1, 1, 1, signature);
+  //   require(undoxxed.balanceOf(user1) == 2, "fail mint in allowlist");
+  //   string memory uri = undoxxed.tokenURI(1);
+  //   require(keccak256(bytes(cover1URI)) == keccak256(bytes(uri)), "fail get cover 1 uri");
+  //   uri = undoxxed.tokenURI(2);
+  //   require(keccak256(bytes(cover2URI)) == keccak256(bytes(uri)), "fail get cover 2 uri");
+  // }
 
   function testAllowlistMintShouldFailMintMoreThanReserve() public {
     undoxxed.setReserveToken1(10);
@@ -311,6 +311,15 @@ contract UNDOXXEDTest is Test {
     vm.startPrank(user1);
     vm.deal(user1, 100 ether);
     undoxxed.privateWhitelistMint{value: whitelistPrice * 1}(1, 0, 1, 0, signature);
+  }
+
+  function testPrivateWhitelistShouldSuccessMint8Copies() public {
+    bytes memory signature = sign(user1, 8, 0, Status.privateWhitelist);
+    undoxxed.setReserveToken1(10);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    undoxxed.privateWhitelistMint{value: whitelistPrice * 8}(8, 0, 8, 0, signature);
   }
 
   function testPrivatewhitelistShouldSuccessWhenAllSupplyAlreadyMinted() public {
@@ -575,6 +584,12 @@ contract UNDOXXEDTest is Test {
     require(balanceOwnerAfter == publicPrice * 20 * basicPercent / 10000, "fail withdraw exact value");
   }
 
+  // function testWithdrawOnly() public {
+  //   vm.deal(owner, 10 ether);
+  //   address(undoxxed).call{value: 1 ether}("");
+  //   undoxxed.withdraw();
+  // }
+
   function testWithdrawShouldFailCallerNotOwner() public {
     undoxxed.setPublic();
     vm.deal(user1, 10 ether);
@@ -590,42 +605,42 @@ contract UNDOXXEDTest is Test {
 
   // test opengem
 
-  function testPermanentProof() public {
-    string memory proof = "MY PROOF";
-    undoxxed.setPublic();
-    undoxxed.setTokenProof1(proof);
-    vm.deal(user1, 10 ether);
-    vm.stopPrank();
-    vm.startPrank(user1);
-    undoxxed.mint{value: publicPrice * 1}(1, 0);
-    require(undoxxed.balanceOf(user1) == 1, "fail mint public");
-    string memory proofGet = undoxxed.tokenProofPermanent(1);
-    require(keccak256(bytes(proofGet)) == keccak256(bytes(proof)), "fail get the correct proof");
-  }
+  // function testPermanentProof() public {
+  //   string memory proof = "MY PROOF";
+  //   undoxxed.setPublic();
+  //   undoxxed.setTokenProof1(proof);
+  //   vm.deal(user1, 10 ether);
+  //   vm.stopPrank();
+  //   vm.startPrank(user1);
+  //   undoxxed.mint{value: publicPrice * 1}(1, 0);
+  //   require(undoxxed.balanceOf(user1) == 1, "fail mint public");
+  //   string memory proofGet = undoxxed.tokenProofPermanent(1);
+  //   require(keccak256(bytes(proofGet)) == keccak256(bytes(proof)), "fail get the correct proof");
+  // }
 
-  function testPermanentProofCover2() public {
-    string memory proof = "MY PROOF";
-    undoxxed.setPublic();
-    undoxxed.setTokenProof2(proof);
-    vm.deal(user1, 10 ether);
-    vm.stopPrank();
-    vm.startPrank(user1);
-    undoxxed.mint{value: publicPrice * 1}(0, 1);
-    require(undoxxed.balanceOf(user1) == 1, "fail mint public");
-    string memory proofGet = undoxxed.tokenProofPermanent(1);
-    require(keccak256(bytes(proofGet)) == keccak256(bytes(proof)), "fail get the correct proof");
-  }
+  // function testPermanentProofCover2() public {
+  //   string memory proof = "MY PROOF";
+  //   undoxxed.setPublic();
+  //   undoxxed.setTokenProof2(proof);
+  //   vm.deal(user1, 10 ether);
+  //   vm.stopPrank();
+  //   vm.startPrank(user1);
+  //   undoxxed.mint{value: publicPrice * 1}(0, 1);
+  //   require(undoxxed.balanceOf(user1) == 1, "fail mint public");
+  //   string memory proofGet = undoxxed.tokenProofPermanent(1);
+  //   require(keccak256(bytes(proofGet)) == keccak256(bytes(proof)), "fail get the correct proof");
+  // }
 
-  function testPermanentURI() public {
-    string memory correctURI = "YOUR BASE URI/1.json";
-    undoxxed.setPublic();
-    undoxxed.setCover1BaseURI(correctURI);
-    vm.deal(user1, 10 ether);
-    vm.stopPrank();
-    vm.startPrank(user1);
-    undoxxed.mint{value: publicPrice * 1}(1, 0);
-    require(undoxxed.balanceOf(user1) == 1, "fail mint public");
-    string[] memory getMediaURI = undoxxed.tokenURIsPermanent(1);
-    require(keccak256(bytes(getMediaURI[getMediaURI.length - 1])) == keccak256(bytes(correctURI)), "fail get media URI");
-  }
+  // function testPermanentURI() public {
+  //   string memory correctURI = "YOUR BASE URI/1.json";
+  //   undoxxed.setPublic();
+  //   undoxxed.setCover1BaseURI(correctURI);
+  //   vm.deal(user1, 10 ether);
+  //   vm.stopPrank();
+  //   vm.startPrank(user1);
+  //   undoxxed.mint{value: publicPrice * 1}(1, 0);
+  //   require(undoxxed.balanceOf(user1) == 1, "fail mint public");
+  //   string[] memory getMediaURI = undoxxed.tokenURIsPermanent(1);
+  //   require(keccak256(bytes(getMediaURI[getMediaURI.length - 1])) == keccak256(bytes(correctURI)), "fail get media URI");
+  // }
 }
