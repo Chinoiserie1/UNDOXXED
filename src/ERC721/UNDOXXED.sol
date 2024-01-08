@@ -15,11 +15,13 @@ import "./verification/Verification.sol";
  * @author chixx.eth
  * @notice ERC721 with 4 types of mint
  */
-contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentProof {
+contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
   string private cover1URI = "ipfs://QmRKmHJfScUq7ZE8DcXjoUMvHHhQvXso7yzfGTbWEck6PA";
   string private cover2URI = "ipfs://QmY5rogmyJrbbuVZtyXKvbngxxGM7EyptJUQHSX3EJjeji";
   string private baseMediaURICover1 = "ipfs://Qmf759TLrNFSL8gP1eU5Btx7BFGFbayh1vnCBgUGaZHNNV";
   string private baseMediaURICover2 = "ipfs://QmXXcEtxSvJnuEUypGpruMxgQo1DNwPAJX5CoBFsqTHRxc";
+  string private baseMediaURICover1Arweave = "ipfs://Qmf759TLrNFSL8gP1eU5Btx7BFGFbayh1vnCBgUGaZHNNV";
+  string private baseMediaURICover2Arweave = "ipfs://QmXXcEtxSvJnuEUypGpruMxgQo1DNwPAJX5CoBFsqTHRxc";
   string private tokenProof1 = "proof cover1";
   string private tokenProof2 = "proof cover2";
 
@@ -60,7 +62,7 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentProof {
     _;
   }
 
-  constructor () ERC721("UNDOXXED", "UNDX") {
+  constructor () ERC721("UNDOXXED BOOK Vol.1", "UNDXX24") {
     fundsReceivers = [msg.sender, 0x19C013b64b7B2c7DaA59b96514662B687665E852];
     _setDefaultRoyalty(msg.sender, 300);
   }
@@ -355,15 +357,6 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentProof {
     withdrawPercent = _percent;
   }
 
-  /**
-   * @dev Add a permanent token URI for a specific tokenId
-   * 
-   * NOTE: see { OpenGem Contracts (token/ERC721/extensions/ERC721PermanentURIs.sol) }
-   */
-  // function addPermanentTokenURI(uint256 _tokenId, string calldata _tokenURI) external onlyOwner {
-  //   _addPermanentTokenURI(_tokenId, _tokenURI);
-  // }
-
   // VIEW FUNCTIONS
 
   /**
@@ -416,6 +409,10 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentProof {
     cover2 = signatureCheckToken2[_sign];
   }
 
+  function getTotalReservedCover() external view returns (uint256) {
+    return cover1Reserved + cover2Reserved;
+  }
+
   /**
    * @dev Return the description of the nft
    */
@@ -436,11 +433,11 @@ contract UNDOXXED is ERC721, Ownable, ERC2981, ERC721PermanentProof {
   /**
    * @dev Return the media of a specific tokenId
    */
-  function getTokenMedia(uint256 _tokenId) external view returns (string memory) {
+  function getTokenMedia(uint256 _tokenId) external view returns (string[2] memory) {
     if (keccak256(bytes(tokenProofPermanent(_tokenId))) == keccak256(bytes(tokenProof1))) {
-      return baseMediaURICover1;
+      return [baseMediaURICover1, baseMediaURICover1Arweave];
     }
-    return baseMediaURICover2;
+    return [baseMediaURICover2, baseMediaURICover2Arweave];
   }
 
   // OVERRIDE FUNCTIONS

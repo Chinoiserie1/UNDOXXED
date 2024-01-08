@@ -7,7 +7,7 @@ import "../../src/ERC721/UNDOXXED.sol";
 import "../../src/ERC721/verification/Verification.sol";
 
 contract UNDOXXEDTest is Test {
-  UNDOXXED public undoxxed;
+  UNDOXXEDBOOK24 public undoxxed;
 
   uint256 internal ownerPrivateKey;
   address internal owner;
@@ -43,7 +43,7 @@ contract UNDOXXEDTest is Test {
     signer = vm.addr(signerPrivateKey);
     vm.startPrank(owner);
 
-    undoxxed = new UNDOXXED();
+    undoxxed = new UNDOXXEDBOOK24();
     undoxxed.setSigner(signer);
     whitelistPrice = undoxxed.getWhitelistPrice();
     publicPrice = undoxxed.getPublicPrice();
@@ -59,7 +59,7 @@ contract UNDOXXEDTest is Test {
 
   function testGetMessageHash() public view {
     uint256 pk = vm.envUint("PRIVATE_KEY");
-    bytes32 messageHash = Verification.getMessageHash(0x26C0320F270b3DdB224b8F7f96C10818d46bFe5C, 0, 2, Status.privateWhitelist);
+    bytes32 messageHash = Verification.getMessageHash(0x5180C7aBA0057aD28827b37E57130EC8fA591559, 10, 10, Status.whitelist);
     bytes32 finalHash = Verification.getEthSignedMessageHash(messageHash);
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(pk, finalHash);
     bytes memory signature = abi.encodePacked(r, s, v);
@@ -69,7 +69,7 @@ contract UNDOXXEDTest is Test {
   // test deploy
 
   function testDeployContract() public {
-    new UNDOXXED();
+    new UNDOXXEDBOOK24();
   }
 
   // test allowlist
