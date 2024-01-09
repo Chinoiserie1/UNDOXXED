@@ -16,14 +16,12 @@ import "./verification/Verification.sol";
  * @notice ERC721 with 4 types of mint
  */
 contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
-  string private cover1URI = "ipfs://QmRKmHJfScUq7ZE8DcXjoUMvHHhQvXso7yzfGTbWEck6PA";
-  string private cover2URI = "ipfs://QmY5rogmyJrbbuVZtyXKvbngxxGM7EyptJUQHSX3EJjeji";
-  string private baseMediaURICover1 = "ipfs://Qmf759TLrNFSL8gP1eU5Btx7BFGFbayh1vnCBgUGaZHNNV";
-  string private baseMediaURICover2 = "ipfs://QmXXcEtxSvJnuEUypGpruMxgQo1DNwPAJX5CoBFsqTHRxc";
-  string private baseMediaURICover1Arweave = "ipfs://Qmf759TLrNFSL8gP1eU5Btx7BFGFbayh1vnCBgUGaZHNNV";
-  string private baseMediaURICover2Arweave = "ipfs://QmXXcEtxSvJnuEUypGpruMxgQo1DNwPAJX5CoBFsqTHRxc";
-  string private tokenProof1 = "proof cover1";
-  string private tokenProof2 = "proof cover2";
+  string private cover1URI = "ipfs://QmWvLA1KDL6moM2WjVY5rowr4voh2uacfNquBLzirJJnUq";
+  string private cover2URI = "ipfs://QmURq6LFwQHazjNB6gfHGpK5RWmFtFNVwZVFWTK9wJGbG9";
+  string private baseMediaURICover = "ipfs://QmRrWWqRRs4CPFng4GHrzo7bzRCSqWPXKUPgceT6vXu7bg";
+  string private baseMediaURICoverArweave = "ar://FO9B-kRnUzIXGCESFfssP3PDAJ8Pu-nqZ4FisiiMR5E";
+  string private tokenProof1 = "880c59d5ad29ee128dfb8e98b7bac76c6c44a0e1ce7d9e257b741b247dbdf227";
+  string private tokenProof2 = "26d9e8f5b5ed3b39ba1e077288b7df9963ba72756c215c424eb179c9332cc2b4";
 
   uint256 private maxSupply = 200;
   uint256 private token1 = 0;
@@ -434,10 +432,7 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
    * @dev Return the media of a specific tokenId.
    */
   function getTokenMedia(uint256 _tokenId) external view returns (string[2] memory) {
-    if (keccak256(bytes(tokenProofPermanent(_tokenId))) == keccak256(bytes(tokenProof1))) {
-      return [baseMediaURICover1, baseMediaURICover1Arweave];
-    }
-    return [baseMediaURICover2, baseMediaURICover2Arweave];
+    return [baseMediaURICover, baseMediaURICoverArweave];
   }
 
   /**
