@@ -310,7 +310,7 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
    * @dev Set the amount of token1 to be reserved.
    */
   function setReserveToken1(uint256 _amountToken1) external onlyOwner {
-    if (token1 + _amountToken1 > maxSupply / 2) revert noSupplyAvailableToken1();
+    if (token1 + _amountToken1 > getMaxSupplyCover()) revert noSupplyAvailableToken1();
     if (_amountToken1 < cover1Reserved)
       revert AmountCanNotBeLowerThanCurrent(cover1Reserved);
     cover1Reserved = _amountToken1;
@@ -320,7 +320,7 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
    * @dev Set the amount of token2 to be reserved.
    */
   function setReserveToken2(uint256 _amountToken2) external onlyOwner {
-    if (token1 + _amountToken2 > maxSupply / 2) revert noSupplyAvailableToken2();
+    if (token1 + _amountToken2 > getMaxSupplyCover()) revert noSupplyAvailableToken2();
     if (_amountToken2 < cover2Reserved)
       revert AmountCanNotBeLowerThanCurrent(cover2Reserved);
     cover2Reserved = _amountToken2;
