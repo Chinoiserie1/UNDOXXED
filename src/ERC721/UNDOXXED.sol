@@ -24,7 +24,7 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
   string private tokenProof1 = "880c59d5ad29ee128dfb8e98b7bac76c6c44a0e1ce7d9e257b741b247dbdf227";
   string private tokenProof2 = "26d9e8f5b5ed3b39ba1e077288b7df9963ba72756c215c424eb179c9332cc2b4";
 
-  uint256 private maxSupply = 200;
+  uint256 private maxSupply = 300;
   uint256 private token1 = 0;
   uint256 private token2 = 0;
   uint256 private whitelistPrice = 0.001 ether;
@@ -271,7 +271,7 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
     if (_newMaxSupply > 300) revert MaxSupplyCanNotBeMoreThan300();
     if (_newMaxSupply < 200) revert MaxSupplyCanNotBeLowerThan200();
     if (_newMaxSupply % 2 == 1) revert MaxSupplyCanNotbeOdd();
-    if (_newMaxSupply > maxSupply) revert MaxSupplyCanNotBeLowerThanActual();
+    if (_newMaxSupply > getAllSupply()) revert MaxSupplyCanNotBeLowerThanActual();
     maxSupply = _newMaxSupply;
   }
 
@@ -358,6 +358,13 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
   // VIEW FUNCTIONS
 
   /**
+   * @dev Return the max supply mintable
+   */
+  function getMaxSupply() external view returns (uint256) {
+    return maxSupply;
+  }
+
+  /**
    * @dev Return the max supply of a cover.
    */
   function getMaxSupplyCover() public view returns (uint256) {
@@ -381,7 +388,7 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
   /**
    * @dev Return supply minted.
    */
-  function getAllSupply() external view returns (uint256) {
+  function getAllSupply() public view returns (uint256) {
     return token1 + token2;
   }
 
