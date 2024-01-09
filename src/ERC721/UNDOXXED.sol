@@ -16,8 +16,8 @@ import "./verification/Verification.sol";
  * @notice ERC721 with 4 types of mint
  */
 contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
-  string private cover1URI = "ipfs://QmRSnfLNNtwhW5JcLyf4xjU7uYEHWT7zFJNn1UpjuSK7cj";
-  string private cover2URI = "ipfs://QmdNcK2PtHr72vAEQ2mEkGa71UuohZtuRti5qgCHv8Tmwk";
+  string private cover1URI = "ipfs://Qmbo6MEp788EKWf3YGRkRxDVrbEL1L3Zj4c2C4W2EGDXnU";
+  string private cover2URI = "ipfs://QmPojiTQyZk7cpJ3LvbHroJJNptoX45ZLj1r5RUeWqdSyX";
   string private baseMediaURICover = "ipfs://QmXSwaTSgMaiER1zKM6mdjjAD6YMXeEgQBBBFhd4vvtCVk";
   string private baseMediaURICoverArweave = "ar://-bk2F28vmvghWo90grBHKbC12ATIjgKG3NL0G2t0G1c";
   /** @dev sha256 JSON hashed */
