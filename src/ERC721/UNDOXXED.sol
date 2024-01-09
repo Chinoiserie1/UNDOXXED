@@ -16,13 +16,13 @@ import "./verification/Verification.sol";
  * @notice ERC721 with 4 types of mint
  */
 contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
-  string private cover1URI = "ipfs://QmWvLA1KDL6moM2WjVY5rowr4voh2uacfNquBLzirJJnUq";
-  string private cover2URI = "ipfs://QmURq6LFwQHazjNB6gfHGpK5RWmFtFNVwZVFWTK9wJGbG9";
-  string private baseMediaURICover = "ipfs://QmRrWWqRRs4CPFng4GHrzo7bzRCSqWPXKUPgceT6vXu7bg";
-  string private baseMediaURICoverArweave = "ar://FO9B-kRnUzIXGCESFfssP3PDAJ8Pu-nqZ4FisiiMR5E";
+  string private cover1URI = "ipfs://QmRSnfLNNtwhW5JcLyf4xjU7uYEHWT7zFJNn1UpjuSK7cj";
+  string private cover2URI = "ipfs://QmdNcK2PtHr72vAEQ2mEkGa71UuohZtuRti5qgCHv8Tmwk";
+  string private baseMediaURICover = "ipfs://QmXSwaTSgMaiER1zKM6mdjjAD6YMXeEgQBBBFhd4vvtCVk";
+  string private baseMediaURICoverArweave = "ar://-bk2F28vmvghWo90grBHKbC12ATIjgKG3NL0G2t0G1c";
   /** @dev sha256 JSON hashed */
-  string private tokenProof1 = "880c59d5ad29ee128dfb8e98b7bac76c6c44a0e1ce7d9e257b741b247dbdf227";
-  string private tokenProof2 = "26d9e8f5b5ed3b39ba1e077288b7df9963ba72756c215c424eb179c9332cc2b4";
+  string private tokenProof1 = "17d71427e98be20097c95fdfffa056be8e77e28313d472dec657e711ef1b18bd";
+  string private tokenProof2 = "5ed873db677ab60596a56181af08575b62383874f5f98aab758406f4f005e537";
 
   uint256 private maxSupply = 300;
   uint256 private token1 = 0;
@@ -422,7 +422,7 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
    * @dev Return the description of the nft.
    */
   function getDescription() external pure returns (string memory) {
-    return "UNDOXXED, the finest in digital lifestyle culture, is an annual hybrid book that merges street and lifestyle culture with the digital world. It focuses on fashion, sneakers, and streetwear, cataloging the best of phygital culture. This publication bridges the physical and digital realms within the evolving Web3 space. 3D by Ryan Owers Art Direction and Music by XERAK";
+    return "UNDOXXED, the finest in digital lifestyle culture, is an annual hybrid book that merges street and lifestyle culture with the digital world. It focuses on fashion, sneakers, and streetwear, cataloging the best of phygital culture. This publication bridges the physical and digital realms within the evolving Web3 space. 3D by Ryan Owers, Art Direction and Music by XERAK.";
   }
 
   /**
