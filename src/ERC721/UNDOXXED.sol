@@ -20,6 +20,7 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
   string private cover2URI = "ipfs://QmURq6LFwQHazjNB6gfHGpK5RWmFtFNVwZVFWTK9wJGbG9";
   string private baseMediaURICover = "ipfs://QmRrWWqRRs4CPFng4GHrzo7bzRCSqWPXKUPgceT6vXu7bg";
   string private baseMediaURICoverArweave = "ar://FO9B-kRnUzIXGCESFfssP3PDAJ8Pu-nqZ4FisiiMR5E";
+  /** @dev sha256 JSON hashed */
   string private tokenProof1 = "880c59d5ad29ee128dfb8e98b7bac76c6c44a0e1ce7d9e257b741b247dbdf227";
   string private tokenProof2 = "26d9e8f5b5ed3b39ba1e077288b7df9963ba72756c215c424eb179c9332cc2b4";
 
@@ -29,8 +30,8 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
   uint256 private whitelistPrice = 0.001 ether;
   uint256 private publicPrice = 0.0015 ether;
 
-  uint256 private cover1Reserved = 0;
-  uint256 private cover2Reserved = 0;
+  uint256 private cover1Reserved = 30;
+  uint256 private cover2Reserved = 30;
 
 
   /** @dev 1% => 100, `withdrawPercent` / 10 000 */
@@ -203,15 +204,15 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
   }
 
   /**
-   * @dev Mint function for `publicMint`
+   * @dev Mint function for `publicMint`.
    * 
    * Requirements:
    * 
-   * - `_amount1` quantity token1 to mint
-   * - `_amount2` quantity token2 to mint
-   * - `msg.value` should be equal at (`_amount1` + `_amount2`) * `publicPrice`
+   * - `_amount1` quantity token1 to mint.
+   * - `_amount2` quantity token2 to mint.
+   * - `msg.value` should be equal at (`_amount1` + `_amount2`) * `publicPrice`.
    * 
-   * NOTE: This function can only be callable when `isPublic` equal true
+   * NOTE: This function can only be callable when `isPublic` equal true.
    * 
    */
   function mint(uint256 _amount1, uint256 _amount2)
@@ -234,14 +235,14 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
   // WHITHDRAW
 
   /**
-   * @dev Withdraw contract balance to 2 differents address
+   * @dev Withdraw contract balance to 2 differents address.
    * 
    * NOTE: First address will receive the `withdrawPercent`,
-   * second one will receive the remaining
+   * second one will receive the remaining.
    * 
    * Requirements:
    * 
-   * - `fundsReceivers` each address should not be zero address
+   * - `fundsReceivers` each address should not be zero address.
    * 
    */
   function withdraw() external onlyOwner {
@@ -263,7 +264,7 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
    * Requirements:
    * 
    * - `_newMaxSupply` should be in the range of 200 to 300.
-   * - `_newMaxSupply` should be even
+   * - `_newMaxSupply` should be even.
    * 
    */
   function setMaxSupply(uint256 _newMaxSupply) external onlyOwner {
@@ -291,14 +292,14 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
   }
 
   /**
-   * @dev Set the whitelist price
+   * @dev Set the whitelist price.
    */
   function setWhitelistPrice(uint256 _newWhitelistPrice) external onlyOwner {
     whitelistPrice = _newWhitelistPrice;
   }
 
   /**
-   * @dev Set the public price
+   * @dev Set the public price.
    */
   function setPublicPrice(uint256 _newPublicPrice) external onlyOwner {
     publicPrice = _newPublicPrice;
@@ -309,8 +310,6 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
    */
   function setReserveToken1(uint256 _amountToken1) external onlyOwner {
     if (token1 + _amountToken1 > getMaxSupplyCover()) revert noSupplyAvailableToken1();
-    if (_amountToken1 < cover1Reserved)
-      revert AmountCanNotBeLowerThanCurrent(cover1Reserved);
     cover1Reserved = _amountToken1;
   }
 
@@ -319,17 +318,17 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
    */
   function setReserveToken2(uint256 _amountToken2) external onlyOwner {
     if (token1 + _amountToken2 > getMaxSupplyCover()) revert noSupplyAvailableToken2();
-    if (_amountToken2 < cover2Reserved)
-      revert AmountCanNotBeLowerThanCurrent(cover2Reserved);
     cover2Reserved = _amountToken2;
   }
 
   /**
    * @dev Set royalties inforamtions.
    * 
-   * NOTE: `_feeNumerator` should be `_feeNumerator` / 10000
+   * NOTE: `_feeNumerator` should be `_feeNumerator` / 10000.
+   * 
    */
   function setDefaultRoyalties(address _recipient, uint96 _feeNumerator) external onlyOwner {
+    if (_feeNumerator > 1000) revert FeeExceed10Percent();
     _setDefaultRoyalty(_recipient, _feeNumerator);
   }
 
@@ -349,9 +348,10 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
   }
 
   /**
-   * @dev Set the percent the first address wil be funded when withdraw
+   * @dev Set the percent the first address wil be funded when withdraw.
    */
   function setPercentReceiver(uint256 _percent) external onlyOwner {
+    if (_percent > 10000) revert PercentCanNotBeMoreThan100Percent();
     withdrawPercent = _percent;
   }
 
@@ -412,33 +412,33 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
   }
 
   /**
-   * @dev Return the description of the nft
+   * @dev Return the description of the nft.
    */
   function getDescription() external pure returns (string memory) {
-    return "UNDOXXED, the finest in digital lifestyle culture, is an annual hybrid book that merges street and lifestyle culture with the digital world. It focuses on fashion, sneakers, and streetwear, cataloging the best of phygital culture. This publication bridges the physical and digital realms within the evolving Web3 space.";
+    return "UNDOXXED, the finest in digital lifestyle culture, is an annual hybrid book that merges street and lifestyle culture with the digital world. It focuses on fashion, sneakers, and streetwear, cataloging the best of phygital culture. This publication bridges the physical and digital realms within the evolving Web3 space. 3D by Ryan Owers Art Direction and Music by XERAK";
   }
 
   /**
-   * @dev Returns the name a specific tokenId.
+   * @dev Returns the name of a specific tokenId.
    */
   function getTokenName(uint256 _tokenId) external view returns (string memory) {
     if (keccak256(bytes(tokenProofPermanent(_tokenId))) == keccak256(bytes(tokenProof1))) {
-      return string("UNDXX vol.1 Black");
+      return string("UNDOXXED BOOK vol.1 Black");
     }
-    return string("UNDXX vol.1 Purple");
+    return string("UNDOXXED BOOK vol.1 Purple");
   }
 
   /**
-   * @dev Return the media of a specific tokenId.
+   * @dev Return the media from ipfs and arweave.
    */
-  function getTokenMedia(uint256 _tokenId) external view returns (string[2] memory) {
+  function getTokenMediaPermanent() external view returns (string[2] memory) {
     return [baseMediaURICover, baseMediaURICoverArweave];
   }
 
   /**
    * @dev Return the sha256 of the media.
    */
-  function getMediaProof() external pure returns (string memory) {
+  function getMediaProofPermanent() external pure returns (string memory) {
     return "72d7795bfd51ec6f02c70650d1bea055e1078b7e1af8c82173d617d306857021";
   }
 

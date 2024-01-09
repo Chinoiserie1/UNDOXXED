@@ -38,4 +38,6 @@ error MaxSupplyCanNotBeMoreThan300();
 error MaxSupplyCanNotBeLowerThan200();
 error MaxSupplyCanNotbeOdd();
 error MaxSupplyCanNotBeLowerThanActual();
+error FeeExceed10Percent();
+error PercentCanNotBeMoreThan100Percent();
 
