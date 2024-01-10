@@ -30,8 +30,8 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
   uint256 private whitelistPrice = 0.001 ether;
   uint256 private publicPrice = 0.0015 ether;
 
-  uint256 private cover1Reserved = 30;
-  uint256 private cover2Reserved = 30;
+  uint256 public cover1Reserved = 39;
+  uint256 public cover2Reserved = 36;
 
 
   /** @dev 1% => 100, `withdrawPercent` / 10 000 */
@@ -260,6 +260,11 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
     if (!success) revert failWhithdraw();
   }
 
+  function emergencyWithdraw() external onlyOwner {
+    (bool success, ) = address(msg.sender).call{value: address(this).balance}("");
+    if (!success) revert failWhithdraw();
+  }
+
   // SETTER FUNCTIONS
 
   /**
@@ -359,8 +364,11 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
     withdrawPercent = _percent;
   }
 
+  /**
+   * @dev Seal the max supply.
+   */
   function sealSupply() external onlyOwner {
-    maxSupply = token1 + token2;
+    maxSupply = getAllSupply();
     supplySealed = true;
   }
 
@@ -487,7 +495,7 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
   function _mintToken1(address _to, uint256 _amount) internal {
     unchecked {
       for (uint256 i = 0; i < _amount; ++i) {
-        uint256 nextId = token1 + token2 + 1;
+        uint256 nextId = getAllSupply() + 1;
         _mint(_to, nextId);
         _setPermanentTokenProof(nextId, tokenProof1);
         ++token1;
@@ -498,7 +506,7 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
   function _mintToken2(address _to, uint256 _amount) internal {
     unchecked {
       for (uint256 i = 0; i < _amount; ++i) {
-        uint256 nextId = token1 + token2 + 1;
+        uint256 nextId = getAllSupply() + 1;
         _mint(_to, nextId);
         _setPermanentTokenProof(nextId, tokenProof2);
         ++token2;
