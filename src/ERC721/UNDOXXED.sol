@@ -27,11 +27,11 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
   uint256 private maxSupply = 300;
   uint256 private token1 = 0;
   uint256 private token2 = 0;
-  uint256 private whitelistPrice = 0.001 ether;
-  uint256 private publicPrice = 0.0015 ether;
+  uint256 private whitelistPrice = 0.074 ether;
+  uint256 private publicPrice = 0.091 ether;
 
-  uint256 public cover1Reserved = 39;
-  uint256 public cover2Reserved = 36;
+  uint256 public cover1Reserved = 40;
+  uint256 public cover2Reserved = 35;
 
 
   /** @dev 1% => 100, `withdrawPercent` / 10 000 */

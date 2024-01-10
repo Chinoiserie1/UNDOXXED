@@ -20,9 +20,9 @@ contract UNDOXXEDTest is Test {
   uint256 internal signerPrivateKey;
   address internal signer;
 
-  uint256 internal maxSupply = 200;
-  uint256 internal maxSupplyToken1 = 100;
-  uint256 internal maxSupplyToken2 = 100;
+  uint256 internal maxSupply = 300;
+  uint256 internal maxSupplyToken1 = 150;
+  uint256 internal maxSupplyToken2 = 150;
 
   uint256 internal privateWhitelistCover1 = 10;
   uint256 internal privateWhitelistCover2 = 10;
@@ -134,8 +134,8 @@ contract UNDOXXEDTest is Test {
   }
 
   function testAllowlistMintAllSupply() public {
-    undoxxed.setReserveToken1(100);
-    undoxxed.setReserveToken2(100);
+    undoxxed.setReserveToken1(150);
+    undoxxed.setReserveToken2(150);
     bytes memory signature = sign(user1, 250, 250, Status.allowlist);
     vm.stopPrank();
     vm.startPrank(user1);
@@ -144,8 +144,8 @@ contract UNDOXXEDTest is Test {
   }
 
   function testAllowlistMintAllSupplyMultipleCall() public {
-    undoxxed.setReserveToken1(100);
-    undoxxed.setReserveToken2(100);
+    undoxxed.setReserveToken1(150);
+    undoxxed.setReserveToken2(150);
     bytes memory signature = sign(user1, 250, 250, Status.allowlist);
     vm.stopPrank();
     vm.startPrank(user1);
@@ -178,8 +178,8 @@ contract UNDOXXEDTest is Test {
   }
 
   function testAllowlistMintMoreThanAllSupplyShouldFail() public {
-    undoxxed.setReserveToken1(100);
-    undoxxed.setReserveToken2(100);
+    undoxxed.setReserveToken1(150);
+    undoxxed.setReserveToken2(150);
     bytes memory signature = sign(user1, 250, 250, Status.allowlist);
     bytes memory signature2 = sign(user2, 250, 250, Status.allowlist);
     vm.stopPrank();
@@ -491,18 +491,18 @@ contract UNDOXXEDTest is Test {
   function testSetPrivatewhitelistToken1ShouldSuccess() public {
     uint256 quantityPrivatewhitelist = 10;
     undoxxed.setReserveToken1(quantityPrivatewhitelist);
-    vm.expectRevert();
-    undoxxed.setReserveToken1(1);
+    undoxxed.setReserveToken2(quantityPrivatewhitelist);
     bytes memory signature = sign(user1, 250, 250, Status.whitelist);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.deal(user1, 100 ether);
     undoxxed.whitelistMint{value: maxSupply * whitelistPrice}(maxSupplyToken1 - quantityPrivatewhitelist - 1, maxSupplyToken2 - quantityPrivatewhitelist, 250, 250, signature);
+    require(undoxxed.balanceOf(user1) == (maxSupplyToken1 - quantityPrivatewhitelist - 1) + (maxSupplyToken2 - quantityPrivatewhitelist), "fail mint");
     vm.stopPrank();
     vm.startPrank(owner);
-    undoxxed.setReserveToken1(11);
+    undoxxed.setReserveToken1(quantityPrivatewhitelist + 1);
     vm.expectRevert(noSupplyAvailableToken1.selector);
-    undoxxed.setReserveToken1(12);
+    undoxxed.setReserveToken1(quantityPrivatewhitelist + 2);
   }
 
   // test view
