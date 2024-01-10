@@ -21,8 +21,8 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
   string private baseMediaURICover = "ipfs://QmXSwaTSgMaiER1zKM6mdjjAD6YMXeEgQBBBFhd4vvtCVk";
   string private baseMediaURICoverArweave = "ar://-bk2F28vmvghWo90grBHKbC12ATIjgKG3NL0G2t0G1c";
   /** @dev sha256 JSON hashed */
-  string private tokenProof1 = "17d71427e98be20097c95fdfffa056be8e77e28313d472dec657e711ef1b18bd";
-  string private tokenProof2 = "5ed873db677ab60596a56181af08575b62383874f5f98aab758406f4f005e537";
+  string private tokenProof1 = "8d39748984ce311a99f51fec1295f4e6c2c432e38617001e879a066150bb4f1c";
+  string private tokenProof2 = "003d43ec4ff0e42e297825e3c1ee0838a6191b44dfb3cb5aa11cb5653fc1dc9d";
 
   uint256 private maxSupply = 300;
   uint256 private token1 = 0;
