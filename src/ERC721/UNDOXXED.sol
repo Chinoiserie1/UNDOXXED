@@ -287,8 +287,8 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
   /**
    * @dev Set `isPublic` to true for enable public mint.
    */
-  function setPublic() external onlyOwner {
-    isPublic = true;
+  function setPublic(bool _public) external onlyOwner {
+    isPublic = _public;
   }
 
   /**
