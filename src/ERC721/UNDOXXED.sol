@@ -463,7 +463,7 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
    * @dev Return the sha256 of the media.
    */
   function getMediaProofPermanent() external pure returns (string memory) {
-    return "72d7795bfd51ec6f02c70650d1bea055e1078b7e1af8c82173d617d306857021";
+    return "ab57c888aa9d13029b64f563ec18941eca5054ad002a35fffd4a68022975dc45";
   }
 
   // OVERRIDE FUNCTIONS
