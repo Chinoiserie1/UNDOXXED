@@ -34,10 +34,10 @@ error noSupplyAvailableToken1();
 error noSupplyAvailableToken2();
 error AmountCanNotBeLowerThanCurrent(uint256);
 error WihdrawToZeroAddress();
-error MaxSupplyCanNotBeMoreThan300();
-error MaxSupplyCanNotBeLowerThan200();
+error MaxSupplyCanNotBeMoreThan500();
 error MaxSupplyCanNotbeOdd();
 error MaxSupplyCanNotBeLowerThanActual();
 error FeeExceed10Percent();
 error PercentCanNotBeMoreThan100Percent();
+error SupplySealed();
 

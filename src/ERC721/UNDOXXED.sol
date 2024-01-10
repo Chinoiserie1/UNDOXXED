@@ -42,6 +42,7 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
   address[2] private fundsReceivers;
 
   bool public isPublic;
+  bool public supplySealed;
 
   mapping(bytes => uint256) private signatureCheckToken1;
   mapping(bytes => uint256) private signatureCheckToken2;
@@ -271,10 +272,10 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
    * 
    */
   function setMaxSupply(uint256 _newMaxSupply) external onlyOwner {
-    if (_newMaxSupply > 300) revert MaxSupplyCanNotBeMoreThan300();
-    if (_newMaxSupply < 200) revert MaxSupplyCanNotBeLowerThan200();
+    if (_newMaxSupply > 500) revert MaxSupplyCanNotBeMoreThan500();
     if (_newMaxSupply % 2 == 1) revert MaxSupplyCanNotbeOdd();
     if (_newMaxSupply > getAllSupply() + getTotalReservedCover()) revert MaxSupplyCanNotBeLowerThanActual();
+    if (supplySealed) revert SupplySealed();
     maxSupply = _newMaxSupply;
   }
 
@@ -356,6 +357,11 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
   function setPercentReceiver(uint256 _percent) external onlyOwner {
     if (_percent > 10000) revert PercentCanNotBeMoreThan100Percent();
     withdrawPercent = _percent;
+  }
+
+  function sealSupply() external onlyOwner {
+    maxSupply = token1 + token2;
+    supplySealed = true;
   }
 
   // VIEW FUNCTIONS
