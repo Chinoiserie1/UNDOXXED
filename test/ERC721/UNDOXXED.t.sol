@@ -412,7 +412,7 @@ contract UNDOXXEDTest is Test {
   // test mint
 
   function testPublicMintShouldSuccess() public {
-    undoxxed.setPublic();
+    undoxxed.setPublic(true);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.deal(user1, 100 ether);
@@ -421,7 +421,7 @@ contract UNDOXXEDTest is Test {
   }
 
   function testPublicMIntShouldSuccessMultipleCall() public {
-    undoxxed.setPublic();
+    undoxxed.setPublic(true);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.deal(user1, 100 ether);
@@ -432,7 +432,7 @@ contract UNDOXXEDTest is Test {
   }
 
   function testPublicMintShouldRevertInvalidAmountSend() public {
-    undoxxed.setPublic();
+    undoxxed.setPublic(true);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.deal(user1, 100 ether);
@@ -443,7 +443,7 @@ contract UNDOXXEDTest is Test {
   // test setter
 
   function testSetPublic() public {
-    undoxxed.setPublic();
+    undoxxed.setPublic(true);
     bool isPublic = undoxxed.isPublic();
     require(isPublic == true, "fail set public");
   }
@@ -452,7 +452,7 @@ contract UNDOXXEDTest is Test {
     vm.stopPrank();
     vm.startPrank(user1);
     vm.expectRevert();
-    undoxxed.setPublic();
+    undoxxed.setPublic(true);
   }
 
   function testSetSigner() public {
@@ -509,7 +509,7 @@ contract UNDOXXEDTest is Test {
 
   function testTokenURIReturnInfo() public {
     string memory expectedURI = "ipfs://QmRKmHJfScUq7ZE8DcXjoUMvHHhQvXso7yzfGTbWEck6PA";
-    undoxxed.setPublic();
+    undoxxed.setPublic(true);
     vm.deal(user1, 10 ether);
     vm.stopPrank();
     vm.startPrank(user1);
@@ -530,7 +530,7 @@ contract UNDOXXEDTest is Test {
   }
 
   function testGetTokenSupplyShoulReturnCorrectInfo() public {
-    undoxxed.setPublic();
+    undoxxed.setPublic(true);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.deal(user1, 100 ether);
@@ -543,7 +543,7 @@ contract UNDOXXEDTest is Test {
   }
 
   function testGetAllSupplyShoulReturnCorrectInfo() public {
-    undoxxed.setPublic();
+    undoxxed.setPublic(true);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.deal(user1, 100 ether);
@@ -569,7 +569,7 @@ contract UNDOXXEDTest is Test {
 
   function testWithdraw() public {
     uint256 basicPercent = 6000;
-    undoxxed.setPublic();
+    undoxxed.setPublic(true);
     vm.deal(user1, 10 ether);
     vm.stopPrank();
     vm.startPrank(user1);
@@ -591,7 +591,7 @@ contract UNDOXXEDTest is Test {
   // }
 
   function testWithdrawShouldFailCallerNotOwner() public {
-    undoxxed.setPublic();
+    undoxxed.setPublic(true);
     vm.deal(user1, 10 ether);
     vm.stopPrank();
     vm.startPrank(user1);
