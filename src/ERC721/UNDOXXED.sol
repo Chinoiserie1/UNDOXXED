@@ -271,7 +271,7 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
     if (_newMaxSupply > 300) revert MaxSupplyCanNotBeMoreThan300();
     if (_newMaxSupply < 200) revert MaxSupplyCanNotBeLowerThan200();
     if (_newMaxSupply % 2 == 1) revert MaxSupplyCanNotbeOdd();
-    if (_newMaxSupply > getAllSupply()) revert MaxSupplyCanNotBeLowerThanActual();
+    if (_newMaxSupply > getAllSupply() + getTotalReservedCover()) revert MaxSupplyCanNotBeLowerThanActual();
     maxSupply = _newMaxSupply;
   }
 
@@ -414,7 +414,7 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
     cover2 = signatureCheckToken2[_sign];
   }
 
-  function getTotalReservedCover() external view returns (uint256) {
+  function getTotalReservedCover() public view returns (uint256) {
     return cover1Reserved + cover2Reserved;
   }
 
