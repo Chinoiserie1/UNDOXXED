@@ -97,8 +97,8 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
     if (_amount2 + signatureCheckToken2[_sign] > _amount2Sign) revert exceedAllowedToken2Mint();
     if (token1 + _amount1 > maxTokenSupply) revert maxSupplyToken1Reach();
     if (token2 + _amount2 > maxTokenSupply) revert maxSupplyToken2Reach();
-    if (_amount1 > 0 && cover1Reserved == 0 || _amount1 > cover1Reserved) revert NoReserveToken1();
-    if (_amount2 > 0 && cover2Reserved == 0 || _amount2 > cover2Reserved) revert NoReserveToken2();
+    if (_amount1 > cover1Reserved) revert NoReserveToken1();
+    if (_amount2 > cover2Reserved) revert NoReserveToken2();
 
     unchecked {
       signatureCheckToken1[_sign] += _amount1;
@@ -184,8 +184,8 @@ contract UNDOXXEDBOOK24 is ERC721, Ownable, ERC2981, ERC721PermanentProof {
     address receiver = msg.sender;
     if (_amount1 + signatureCheckToken1[_sign] > _amount1Sign) revert exceedAllowedToken1Mint();
     if (_amount2 + signatureCheckToken2[_sign] > _amount2Sign) revert exceedAllowedToken2Mint();
-    if (_amount1 > 0 && cover1Reserved == 0 || _amount1 > cover1Reserved) revert NoReserveToken1();
-    if (_amount2 > 0 && cover2Reserved == 0 || _amount2 > cover2Reserved) revert NoReserveToken2();
+    if (_amount1 > cover1Reserved) revert NoReserveToken1();
+    if (_amount2 > cover2Reserved) revert NoReserveToken2();
 
     unchecked {
       if ((_amount1 + _amount2) * whitelistPrice > msg.value) revert invalidAmountSend();
